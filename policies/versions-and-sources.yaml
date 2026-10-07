@@ -1,0 +1,151 @@
+# yaml-language-server: $schema=
+# ============================================================================
+# Versions and Official Sources — SINGLE SOURCE OF TRUTH
+# Enterprise DevOps Copilot Control Framework
+#
+# Every pinned/target version number and every official-documentation or
+# MCP-endpoint URL used anywhere in this repository is defined ONCE,
+# here. Nowhere else should a version number or URL be hand-typed as a
+# fresh literal — other files either:
+#   (a) read this file at runtime (scripts/bitbucket/get-version.*,
+#       scripts/jfrog/get-version.*), or
+#   (b) cite it by path ("see policies/versions-and-sources.yaml") rather
+#       than repeating the value, or
+#   (c) must carry the same literal unavoidably (e.g. .mcp.json needs a
+#       working URL to function as config) — those cases are listed in
+#       `must_also_update_manually` below and are checked for drift by
+#       scripts/validation/validate-versions.ps1 / .sh.
+#
+# To bump a version or change a URL: edit ONLY this file, then run
+# scripts/validation/validate-versions.ps1 (or .sh) to find every place
+# that still needs a matching manual edit (CI runs this automatically).
+# ============================================================================
+
+bitbucket:
+  product: "Bitbucket Data Center"
+  pinned_target_version: "9.4.5"
+  rule: "Never use Bitbucket 10.x API shapes against this target."
+  official_docs:
+    rest_api: "https://developer.atlassian.com/server/bitbucket/rest/"
+    mcp_for_bitbucket_dc: "https://confluence.atlassian.com/bitbucketserver/mcp-for-bitbucket-dc-1822723926.html"
+    mcp_server_for_bitbucket: "https://confluence.atlassian.com/bitbucketserver/mcp-server-for-bitbucket-1822723944.html"
+    confluence_root: "https://confluence.atlassian.com/"
+    confluence_bitbucketserver_root: "https://confluence.atlassian.com/bitbucketserver/"
+  mcp_endpoint_pattern: "<bitbucket-base-url>/rest/mcp/1.0/"
+
+jira:
+  product: "Jira Cloud"
+  pinned_target_version: "cloud (continuously deployed — no fixed version to pin)"
+  official_docs:
+    rest_api_v3: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/"
+    rest_api_v3_permission_schemes: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-permission-schemes/"
+    rest_api_v3_permissions: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-permissions/"
+    rest_api_v3_projects: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/"
+    rest_api_v3_workflows: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-workflows/"
+    rest_api_v3_intro: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/"
+    basic_auth: "https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/"
+    rovo_mcp_overview: "https://developer.atlassian.com/cloud/rovo-mcp/"
+    rovo_mcp_getting_started: "https://developer.atlassian.com/cloud/rovo-mcp/guides/getting-started/"
+    rovo_mcp_supported_tools: "https://developer.atlassian.com/cloud/rovo-mcp/guides/supported-tools/"
+    rovo_mcp_auth: "https://developer.atlassian.com/cloud/rovo-mcp/guides/authentication-and-authorization/"
+    developer_root: "https://developer.atlassian.com/"
+  mcp_endpoint: "https://mcp.atlassian.com/v2/mcp"
+
+confluence:
+  product: "Confluence Cloud"
+  pinned_target_version: "cloud (continuously deployed — no fixed version to pin)"
+  official_docs:
+    rest_api_v2: "https://developer.atlassian.com/cloud/confluence/rest/v2/"
+    rest_api_v2_spaces: "https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/"
+    rovo_mcp_overview: "https://developer.atlassian.com/cloud/rovo-mcp/"
+  mcp_endpoint: "https://mcp.atlassian.com/v2/mcp"
+
+jfrog:
+  product: "JFrog Artifactory Self-Managed / On-Prem"
+  version_policy: >
+    NEVER hard-code this value into runtime logic — it is recorded here
+    purely as a documentation reference and MUST be re-verified against
+    official_docs.release_notes at bump time. All scripts discover the
+    actual running version at call time via
+    GET /artifactory/api/system/version (Section 4/38).
+  reference_version_at_generation_time: "7.161.32"
+  reference_version_verified_at: "2026-10-07"
+  official_docs:
+    release_notes: "https://docs.jfrog.com/releases/docs/artifactory-release-notes"
+    mcp_install: "https://docs.jfrog.com/installation/docs/mcp"
+    mcp_server_tools: "https://docs.jfrog.com/installation/docs/mcp-server-tools"
+    add_mcp_server_to_client: "https://docs.jfrog.com/installation/docs/add-mcp-server-to-client"
+    rest_create_repository: "https://docs.jfrog.com/artifactory/reference/createrepository"
+    rest_delete_repository: "https://docs.jfrog.com/artifactory/reference/deleterepository"
+    rest_get_repository_configuration: "https://docs.jfrog.com/artifactory/reference/getrepositoryconfiguration"
+    rest_update_repository_configuration: "https://jfrog.com/help/r/jfrog-rest-apis/update-repository-configuration"
+    rest_create_permission_target_v2: "https://docs.jfrog.com/administration/reference/createpermissiontargetv2"
+    rest_get_permission_target_details_v2: "https://docs.jfrog.com/administration/reference/getpermissiontargetdetailsv2"
+    rest_get_permission_targets: "https://docs.jfrog.com/administration/reference/getpermissiontargets"
+    deprecated_apis_note: "https://docs.jfrog.com/integrations/docs/deprecated-jfrog-apis"
+    docs_root: "https://docs.jfrog.com/"
+    jfrog_root: "https://jfrog.com/"
+  mcp_tool_catalog_verified_at_doc_version: "0.442"
+  mcp_endpoint_pattern: "<JFROG_PLATFORM_URL>/mcp"
+
+github:
+  official_docs:
+    root: "https://docs.github.com/"
+    copilot: "https://docs.github.com/en/copilot/"
+    enterprise_cloud: "https://docs.github.com/en/enterprise-cloud/"
+    enterprise_server: "https://docs.github.com/en/enterprise-server/"
+    custom_agents_configuration: "https://docs.github.com/en/copilot/reference/custom-agents-configuration"
+    use_custom_agents: "https://docs.github.com/en/copilot/how-tos/copilot-in-your-ide/use-copilot-agents/use-custom-agents"
+    cli_custom_agents: "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli"
+    add_skills: "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills"
+    add_mcp_servers: "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers"
+    set_up_github_mcp_server: "https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/set-up-the-github-mcp-server"
+    enterprise_mcp_configuration: "https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/enterprise-configuration"
+    github_mcp_server_repo: "https://github.com/github/github-mcp-server"
+    enterprise_cloud_audit_log: "https://docs.github.com/en/enterprise-cloud@latest/rest/enterprise-admin/audit-log"
+    rest_actions: "https://docs.github.com/en/rest/actions"
+    rest_actions_runner_groups: "https://docs.github.com/en/rest/actions/self-hosted-runner-groups"
+    rest_actions_runners: "https://docs.github.com/en/rest/actions/self-hosted-runners"
+    rest_branches: "https://docs.github.com/en/rest/branches/branches"
+    rest_branch_protection: "https://docs.github.com/en/rest/branches/branch-protection"
+    rest_code_scanning: "https://docs.github.com/en/rest/code-scanning"
+    rest_collaborators: "https://docs.github.com/en/rest/collaborators/collaborators"
+    rest_dependabot: "https://docs.github.com/en/rest/dependabot"
+    rest_git_refs: "https://docs.github.com/en/rest/git/refs"
+    rest_orgs: "https://docs.github.com/en/rest/orgs/orgs"
+    rest_org_rules: "https://docs.github.com/en/rest/orgs/rules"
+    rest_pulls: "https://docs.github.com/en/rest/pulls/pulls"
+    rest_pull_reviews: "https://docs.github.com/en/rest/pulls/reviews"
+    rest_repos: "https://docs.github.com/en/rest/repos/repos"
+    rest_repo_rules: "https://docs.github.com/en/rest/repos/rules"
+    rest_secret_scanning: "https://docs.github.com/en/rest/secret-scanning"
+    rest_team_members: "https://docs.github.com/en/rest/teams/members"
+    rest_teams: "https://docs.github.com/en/rest/teams/teams"
+    rest_webhooks_orgs: "https://docs.github.com/en/rest/webhooks/orgs"
+    rest_webhooks_repos: "https://docs.github.com/en/rest/webhooks/repos"
+  mcp_hosted_endpoint_cloud: "https://api.githubcopilot.com/mcp/"
+  mcp_hosted_endpoint_cloud_all_tools: "https://api.githubcopilot.com/mcp/x/all"
+  mcp_hosted_endpoint_cloud_actions: "https://api.githubcopilot.com/mcp/x/actions"
+  server_note: >
+    No hosted MCP endpoint exists for Enterprise Server — deploy the
+    self-hosted github-mcp-server build against the Server hostname.
+
+vscode:
+  official_docs:
+    root: "https://code.visualstudio.com/docs/"
+    mcp_servers: "https://code.visualstudio.com/docs/agent-customization/mcp-servers"
+    mcp_configuration_reference: "https://code.visualstudio.com/docs/agents/reference/mcp-configuration"
+
+# ----------------------------------------------------------------------------
+# Places that need a LITERAL copy of a value above because the consuming
+# file is itself runnable/functional config, not prose that can say
+# "see policies/versions-and-sources.yaml". Each is checked for drift by
+# scripts/validation/validate-versions.ps1 / .sh.
+# ----------------------------------------------------------------------------
+must_also_update_manually:
+  - file: ".mcp.json"
+    reason: "MCP client config needs a literal, working URL per server."
+  - file: ".vscode/mcp.json"
+    reason: "Same as above, VS Code format."
+  - file: "README.md"
+    reason: "Human-readable version/URL summary tables (kept short; point readers here for the authoritative value)."

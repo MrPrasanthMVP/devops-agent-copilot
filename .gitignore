@@ -1,0 +1,43 @@
+# ============================================================================
+# Enterprise DevOps Copilot Control Framework - .gitignore
+# Local POC secrets and runtime artifacts must never be committed.
+# ============================================================================
+
+# --- Local POC credentials (see Section 11 of the governing spec) ----------
+.github/local-secrets/
+!.github/local-secrets/*.example
+
+# --- Audit / operational logs -----------------------------------------------
+logs/*.jsonl
+logs/*.log
+!logs/.gitkeep
+
+# --- Approval ledger (local POC state) --------------------------------------
+# Signed approval tokens (Common.psm1/common.sh) and consumption markers.
+logs/.approvals/
+# Staged, not-yet-approved proposals (human-approval request-approval.*).
+.proposals/
+# POC-only HMAC signing key auto-provisioned by Common.psm1/common.sh.
+.github/local-secrets/approval-signing-key.txt
+
+# --- OS / editor noise -------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/*.log
+
+# --- PowerShell / shell transcripts ------------------------------------------
+*.transcript
+*.ps1.log
+
+# --- Node / tooling (if validation tooling is added later) -------------------
+node_modules/
+
+# --- Environment files -------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Test output --------------------------------------------------------------
+tests/**/*.results.xml
+tests/**/TestResults/

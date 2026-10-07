@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "bitbucket-dc": {
+      "type": "http",
+      "url": "https://bitbucket.example.internal/rest/mcp/1.0/",
+      "tools": ["*"]
+    },
+    "atlassian-rovo": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "tools": ["*"]
+    },
+    "jfrog": {
+      "type": "http",
+      "url": "https://artifactory.example.internal/mcp",
+      "tools": ["*"]
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "tools": ["*"]
+    }
+  }
+}

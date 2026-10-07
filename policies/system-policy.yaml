@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=
+# ============================================================================
+# System / Platform Policy
+# Enterprise DevOps Copilot Control Framework
+# Declares capability-discovery mechanics (Sections 3-5, 38).
+#
+# All version numbers and official-documentation/MCP-endpoint URLs live
+# in exactly one place: policies/versions-and-sources.yaml. This file
+# references that one by path rather than repeating any literal value —
+# if you need a version number or a URL, look there, not here.
+# ============================================================================
+
+versions_and_sources_file: "policies/versions-and-sources.yaml"
+
+bitbucket:
+  product: "Bitbucket Data Center"
+  rule: "Never use Bitbucket 10.x APIs against this target."
+  see: "policies/versions-and-sources.yaml#bitbucket (pinned_target_version, official_docs, mcp_endpoint_pattern)"
+  mcp:
+    name: "mcp-for-bitbucket-dc"
+    vendor: "Atlassian (official)"
+    transport: http
+    auth: "Bearer token (whitelists REST endpoints the caller's token already permits)"
+  version_discovery:
+    method: "GET /rest/api/1.0/application-properties"
+    required: true
+    implemented_by: "scripts/bitbucket/get-version.ps1 / .sh (reads the pinned target from versions-and-sources.yaml)"
+
+jira:
+  product: "Jira Cloud"
+  see: "policies/versions-and-sources.yaml#jira (official_docs, mcp_endpoint)"
+  mcp:
+    name: "Atlassian Rovo MCP Server"
+    vendor: "Atlassian (official)"
+    transport: http
+    auth: "OAuth 2.1"
+    tool_model: "dynamic discovery via discover/executeRead/executeWrite/executeDestructive meta-tools; no fixed per-product tool names are assumed"
+  version_discovery:
+    method: "GET /rest/api/3/serverInfo (cloud -- version field informational only)"
+
+confluence:
+  product: "Confluence Cloud"
+  see: "policies/versions-and-sources.yaml#confluence (official_docs, mcp_endpoint)"
+  mcp:
+    name: "Atlassian Rovo MCP Server"
+    vendor: "Atlassian (official)"
+    shared_with: jira
+    tool_model: "dynamic discovery (same mechanism as jira)"
+
+jfrog:
+  product: "JFrog Artifactory Self-Managed / On-Prem"
+  version_policy: >
+    Do NOT hard-code a version in logic or SKILL.md prose. The
+    self-managed Artifactory version MUST be discovered at runtime via
+    GET /artifactory/api/system/version and capabilities routed
+    accordingly (Section 4, 38). The reference value used for
+    drift-warning only (never for routing) lives in
+    policies/versions-and-sources.yaml#jfrog.reference_version_at_generation_time
+    and must be re-verified there against
+    policies/versions-and-sources.yaml#jfrog.official_docs.release_notes
+    before being relied upon.
+  see: "policies/versions-and-sources.yaml#jfrog (reference version, official_docs, mcp_endpoint_pattern, tool catalog version)"
+  mcp:
+    name: "JFrog MCP Server"
+    vendor: "JFrog (official)"
+    status: "beta at time of writing -- re-verify before production reliance"
+    transport: http
+    auth: "OAuth authorization flow per client platform"
+    tool_catalog_note: >
+      The tool catalog is versioned and evolves; the agent MUST discover
+      tools at connect time rather than assume the catalog recorded in
+      versions-and-sources.yaml is current. Verified categories at the
+      recorded catalog version include: access (tokens, oidc, projects,
+      roles, stages), artifactory (artifacts, repositories, packages,
+      builds, federation), distribution, evidence, security
+      (catalog/curation), apptrust, workers. No artifact DELETE, user
+      CRUD, group CRUD, or permission-target CRUD tool was found in that
+      catalog version -- those operations currently require the REST API
+      fallback (Section 4 decision tree), tracked per-skill as
+      "NOT IMPLEMENTED (MCP) -- REST fallback available/NOT IMPLEMENTED".
+  version_discovery:
+    method: "GET /artifactory/api/system/version"
+    required: true
+    implemented_by: "scripts/jfrog/get-version.ps1 / .sh (reads the reference version from versions-and-sources.yaml)"
+
+github:
+  deployments: [cloud, server]
+  see: "policies/versions-and-sources.yaml#github (official_docs, mcp_hosted_endpoint_*)"
+  config_shape:
+    github:
+      deployment: "cloud | server"
+      hostname: string
+      organization: string
+      enterprise: string
+  cloud:
+    mcp:
+      name: "GitHub MCP Server (hosted)"
+      vendor: "GitHub (official)"
+      transport: http
+      auth: "OAuth"
+  server:
+    mcp:
+      name: "GitHub MCP Server (self-hosted build)"
+      vendor: "GitHub (official, open source)"
+      note: >
+        The hosted endpoint is a GitHub.com / Enterprise Cloud service
+        and must NOT be assumed reachable from a GitHub Enterprise
+        Server deployment. For Enterprise Server, deploy the
+        self-hosted github-mcp-server binary/container against the
+        Enterprise Server hostname and verify REST/GraphQL API version
+        compatibility with the installed Enterprise Server release
+        before use.
+      rule: "Do not assume Cloud APIs for Server. Do not assume Server APIs for Cloud."
+  version_discovery:
+    cloud: "N/A (continuously deployed)"
+    server: "GET /api/v3/meta or administrative version endpoint, per installed Enterprise Server release docs"
+    implemented_by: "scripts/github/get-deployment-info.ps1 / .sh"
+
+capability_discovery_contract:
+  description: >
+    Before routing any operation, the agent records a capability snapshot
+    per system (Section 38 example shape below) and routes by capability,
+    not by assumption.
+  example:
+    system: jfrog
+    version: detected
+    mcp:
+      available: true
+    capabilities:
+      repository_read: true
+      repository_write: true
+      artifact_delete: true

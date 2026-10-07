@@ -1,0 +1,40 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "bitbucket-token",
+      "description": "Bitbucket Data Center personal access token (Bearer). Never committed; stored by VS Code's secret storage.",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "jfrog-token",
+      "description": "JFrog Platform access token (Bearer). Never committed; stored by VS Code's secret storage.",
+      "password": true
+    }
+  ],
+  "servers": {
+    "bitbucket-dc": {
+      "type": "http",
+      "url": "https://bitbucket.example.internal/rest/mcp/1.0/",
+      "headers": {
+        "Authorization": "Bearer ${input:bitbucket-token}"
+      }
+    },
+    "atlassian-rovo": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v2/mcp"
+    },
+    "jfrog": {
+      "type": "http",
+      "url": "https://artifactory.example.internal/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:jfrog-token}"
+      }
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    }
+  }
+}

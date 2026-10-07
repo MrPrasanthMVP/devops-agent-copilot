@@ -1,0 +1,162 @@
+# yaml-language-server: $schema=
+# ============================================================================
+# Approval Policy
+# Enterprise DevOps Copilot Control Framework
+#
+# Defines HOW human approval is requested, what counts as a valid approval,
+# and what does NOT count. This is the operational contract behind the
+# .github/skills/human-approval/ Skill. See Sections 7-10, 32-34.
+# ============================================================================
+
+principle: >
+  The user's original natural-language request is NEVER itself an approval.
+  A request to act ("delete repository TEST") only triggers the
+  READ -> ANALYZE -> PROPOSE pipeline. Execution requires a second,
+  explicit, operation-bound approval utterance from the human.
+
+three_controls:
+  authentication:
+    question: "Who is the user?"
+    satisfied_by:
+      - Verified IDE/CLI identity (GitHub/Atlassian/JFrog session)
+      - Local POC token file presence (non-production only)
+  authorization:
+    question: "Does the user have permission to perform this operation on this target?"
+    satisfied_by:
+      - Target-system RBAC/permission check performed via MCP/API prior to proposing
+  human_approval:
+    question: "Did the user explicitly approve THIS SPECIFIC change?"
+    satisfied_by:
+      - An approval phrase (see approval_phrases) that references the exact
+        operationId generated for this proposal
+
+requirement: >
+  All three controls MUST be satisfied before any WRITE, DESTRUCTIVE,
+  ADMINISTRATIVE, or SECURITY_SENSITIVE operation executes. READ_ONLY
+  operations require only authentication + authorization.
+
+approval_phrases:
+  generic_write: "APPROVE CREATE | APPROVE UPDATE"
+  destructive: "APPROVE DELETE"
+  merge: "APPROVE MERGE"
+  permission_change: "APPROVE PERMISSION CHANGE"
+  admin_change: "APPROVE ADMIN CHANGE"
+  branch_protection: "APPROVE BRANCH PROTECTION"
+  webhook_change: "APPROVE WEBHOOK CHANGE"
+  security_change: "APPROVE SECURITY CHANGE"
+  script_creation: "APPROVE SCRIPT CREATION"
+  execution: "APPROVE EXECUTION"
+
+insufficient_approval_tokens:
+  description: >
+    These generic affirmations are NEVER sufficient to authorize a WRITE,
+    DESTRUCTIVE, ADMINISTRATIVE, or SECURITY_SENSITIVE operation. If the
+    agent receives one of these in response to a PROPOSED OPERATION, it
+    MUST re-prompt for the exact required approval phrase and MUST NOT
+    execute.
+  tokens:
+    - "yes"
+    - "ok"
+    - "okay"
+    - "sure"
+    - "do it"
+    - "go ahead"
+    - "proceed"
+    - "fine"
+    - "approved"   # too generic; must match the operation-specific phrase
+    - "confirm"    # too generic; must match the operation-specific phrase
+
+operation_binding:
+  description: >
+    An approval is cryptographically bound to a single operationId via
+    an HMAC-SHA256 signature (scripts/common/Common.psm1#New-ApprovalToken /
+    common.sh#new_approval_token) and authorizes exactly one
+    system+target+operation+approvalType tuple -- nothing else.
+  bound_fields:
+    - operationId
+    - user
+    - system
+    - target
+    - operation        # dotted key, e.g. "bitbucket.repository.delete" -- matches policies/operation-classification.json
+    - risk
+    - approvalType      # the exact phrase, e.g. "APPROVE DELETE"
+    - issuedAt
+    - signature         # HMAC-SHA256 over the fields above
+  rule: >
+    An approval for "DELETE artifact A" MUST NOT authorize "DELETE
+    artifact B", even if both were proposed in the same conversation turn
+    (Section 32). Enforced by Test-ApprovalToken / test_approval_token,
+    which every execution script calls immediately before mutating.
+
+multiple_change_handling:
+  description: >
+    When a single user request implies multiple mutations, the agent MUST
+    enumerate each as a separately numbered, separately approvable
+    operation (Section 9).
+  partial_approval: true
+  example:
+    request: "Create repository, add team, change permissions, configure branch protection, add webhook, merge PR"
+    enumeration:
+      - "1. CREATE repository"
+      - "2. MODIFY team"
+      - "3. MODIFY permissions"
+      - "4. MODIFY branch protection"
+      - "5. CREATE webhook"
+      - "6. MERGE pull request"
+    valid_partial_approval: "APPROVE 1\nAPPROVE 4"
+
+script_creation_vs_execution:
+  description: >
+    Approval to create a fallback script NEVER implies approval to run it
+    (Section 33). These are two independent approval gates with two
+    independent operationIds:
+      1. APPROVE SCRIPT CREATION -> produces the script file, unexecuted.
+      2. APPROVE EXECUTION       -> required separately, bound to a new
+         operationId that references the created script's path + version
+         + checksum.
+
+dry_run:
+  description: >
+    Any operation supports a dry-run / -WhatIf mode that performs the
+    READ + PROPOSE steps and prints the current/proposed state and risk,
+    but MUST NOT call any mutating MCP tool or REST endpoint (Section 34).
+
+staged_proposal_schema:
+  description: >
+    Written by request-approval.ps1/.sh to .proposals/<operationId>.json.
+    NOT a usable approval -- Test-ApprovalToken never reads this location.
+  operationId: string            # e.g. "op-<12-hex>"
+  user: string                   # requester identity
+  system: string                 # bitbucket | jira | confluence | jfrog | github
+  target: string
+  operationKey: string            # dotted key, e.g. "bitbucket.repository.delete"
+  risk: string                   # READ_ONLY | WRITE | DESTRUCTIVE | ADMINISTRATIVE | SECURITY_SENSITIVE
+  approvalType: string            # exact phrase required, e.g. "APPROVE DELETE"
+  currentState: string
+  proposedState: string
+  impact: string
+  requestedAt: string
+  expiresAfterSeconds: number     # default 900; unconfirmed proposals expire
+
+signed_approval_token_schema:
+  description: >
+    Minted by confirm-approval.ps1/.sh via New-ApprovalToken /
+    new_approval_token ONLY on an exact approvalType match, written to
+    logs/.approvals/<operationId>.json. This is the record
+    Test-ApprovalToken / test_approval_token validates.
+  operationId: string
+  user: string
+  system: string
+  target: string
+  operation: string               # same dotted key as operationKey above
+  risk: string
+  approvalType: string
+  issuedAt: string
+  signature: string               # HMAC-SHA256, base64
+  consumed_marker: "logs/.approvals/<operationId>.consumed (sibling file written on first successful execution; makes the token single-use)"
+
+expiry:
+  default_seconds: 900
+  rationale: >
+    A stale approval (state may have changed since proposal) must not be
+    usable indefinitely. On expiry the agent MUST re-run READ + PROPOSE.

@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=
+# ============================================================================
+# Operation Classification Policy
+# Enterprise DevOps Copilot Control Framework
+#
+# Purpose: Every operation the agent performs against Bitbucket, Jira,
+# Confluence, JFrog Artifactory, or GitHub Enterprise MUST be classified
+# into exactly one of the categories below BEFORE execution. Classification
+# drives whether human approval is required (Section 7-10, 16).
+#
+# The agent (.github/agents/enterprise-devops.agent.md) and every Skill
+# MUST consult this file (or an equivalent in-context copy) prior to
+# proposing an operation. This file is policy, not code -- it does not
+# grant execution rights by itself; it only determines the approval gate.
+# ============================================================================
+
+categories:
+  READ_ONLY:
+    description: >
+      Non-mutating operations. Information retrieval only. No state in any
+      target system changes as a result of this operation.
+    approval_required: false
+    explicit_confirmation: false
+    examples:
+      - "GET repository"
+      - "LIST pull requests"
+      - "SEARCH Jira issues (JQL)"
+      - "GET Confluence page"
+      - "LIST Artifactory repositories"
+      - "GET branch protection configuration"
+      - "LIST GitHub Actions runs"
+
+  WRITE:
+    description: >
+      Mutating operations that create or modify a resource but are
+      reversible or low blast-radius (e.g. editing a field, adding a
+      comment, merging a reviewed PR under existing rules).
+    approval_required: true
+    explicit_confirmation: false
+    examples:
+      - "CREATE repository"
+      - "MERGE pull request"
+      - "EDIT Jira issue"
+      - "EDIT Confluence page"
+      - "ADD Jira comment"
+      - "CREATE Jira issue"
+
+  DESTRUCTIVE:
+    description: >
+      Operations that delete, overwrite, or otherwise cause irreversible
+      or hard-to-reverse loss of data or configuration.
+    approval_required: true
+    explicit_confirmation: true
+    confirmation_phrase: "APPROVE DELETE"
+    examples:
+      - "DELETE repository"
+      - "DELETE Jira issue"
+      - "DELETE Artifactory artifact"
+      - "DELETE branch"
+      - "FORCE PUSH"
+      - "DELETE Confluence page"
+      - "REVOKE access token"
+
+  ADMINISTRATIVE:
+    description: >
+      Operations that change platform-level or repository-level
+      configuration/governance but are not themselves a delete.
+    approval_required: true
+    explicit_confirmation: false
+    examples:
+      - "CHANGE branch protection"
+      - "CREATE JFrog repository"
+      - "MODIFY repository ruleset"
+      - "CONFIGURE merge settings"
+      - "CONFIGURE merge checks"
+      - "CREATE/MODIFY JFrog project"
+      - "ADD/REMOVE team member"
+
+  SECURITY_SENSITIVE:
+    description: >
+      Operations that change who can do what: permissions, roles,
+      secrets, authentication, access tokens, webhooks that can exfiltrate
+      data, or security scanning configuration.
+    approval_required: true
+    explicit_confirmation: false
+    examples:
+      - "CHANGE repository permissions"
+      - "CHANGE Jira project permissions"
+      - "CHANGE Confluence space permissions"
+      - "CHANGE JFrog permission target"
+      - "CREATE/MODIFY webhook"
+      - "CHANGE GitHub Actions secrets/variables"
+      - "DISABLE code scanning / secret scanning / Dependabot"
+      - "CHANGE organization/enterprise administration settings"
+
+# ----------------------------------------------------------------------------
+# Canonical operation -> category mapping (Section 16 worked examples).
+# This list is illustrative, not exhaustive. Any operation not listed here
+# MUST be classified by analogy to the category descriptions above, and when
+# ambiguous, the agent MUST default to the stricter category.
+# ----------------------------------------------------------------------------
+operations:
+  - { system: generic,     resource: repository,        operation: GET,                         category: READ_ONLY }
+  - { system: generic,     resource: repository,        operation: CREATE,                       category: WRITE }
+  - { system: generic,     resource: repository,        operation: DELETE,                       category: DESTRUCTIVE }
+  - { system: generic,     resource: pull_request,      operation: MERGE,                        category: WRITE }
+  - { system: generic,     resource: permissions,       operation: CHANGE,                       category: SECURITY_SENSITIVE }
+  - { system: generic,     resource: branch_protection, operation: CHANGE,                        category: ADMINISTRATIVE }
+  - { system: jfrog,       resource: artifact,          operation: DELETE,                        category: DESTRUCTIVE }
+  - { system: jfrog,       resource: repository,        operation: CREATE,                        category: ADMINISTRATIVE }
+  - { system: jira,        resource: issue,             operation: EDIT,                           category: WRITE }
+  - { system: jira,        resource: issue,             operation: DELETE,                         category: DESTRUCTIVE }
+  - { system: confluence,  resource: page,              operation: EDIT,                           category: WRITE }
+
+# ----------------------------------------------------------------------------
+# Default rule when an operation cannot be matched to an explicit entry.
+# ----------------------------------------------------------------------------
+default_unclassified_operation:
+  category: ADMINISTRATIVE
+  rationale: >
+    When in doubt, treat an unmapped mutating operation as requiring
+    approval and administrative-level scrutiny rather than silently
+    allowing it (Section 57: "When uncertain, DO NOT GUESS").

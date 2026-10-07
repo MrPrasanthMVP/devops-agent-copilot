@@ -1,0 +1,92 @@
+name: Enterprise DevOps Copilot CI
+
+# Validates repository structure, Skills, security policy, and runs unit
+# tests. Never connects to production Bitbucket/Jira/Confluence/JFrog/
+# GitHub systems (requirement.md Section 45) - all tests use mocked
+# responses and local-only fixtures.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pester (Windows/PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]"5.0.0" })) {
+            Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+
+      - name: Repository structure validation (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/validation/validate-repository.ps1
+
+      - name: Skill validation (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/validation/validate-skills.ps1
+
+      - name: Security validation (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/validation/validate-security.ps1
+
+      - name: Version/URL drift validation (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/validation/validate-versions.ps1
+
+      - name: Unit tests (Pester)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $result = Invoke-Pester -Path . -CI -PassThru
+          if ($result.FailedCount -gt 0) { exit 1 }
+
+      - name: Install jq, bats (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq bats
+
+      - name: Repository structure validation (Bash)
+        if: runner.os == 'Linux'
+        run: bash ./scripts/validation/validate-repository.sh
+
+      - name: Skill validation (Bash)
+        if: runner.os == 'Linux'
+        run: bash ./scripts/validation/validate-skills.sh
+
+      - name: Security validation (Bash)
+        if: runner.os == 'Linux'
+        run: bash ./scripts/validation/validate-security.sh
+
+      - name: Version/URL drift validation (Bash)
+        if: runner.os == 'Linux'
+        run: bash ./scripts/validation/validate-versions.sh
+
+      - name: Unit tests (Bats)
+        if: runner.os == 'Linux'
+        run: |
+          find .github/skills -name "*.bats" -print0 | xargs -0 -r -n1 bats

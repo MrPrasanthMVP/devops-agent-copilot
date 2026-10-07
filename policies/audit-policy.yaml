@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=
+# ============================================================================
+# Audit Policy
+# Enterprise DevOps Copilot Control Framework
+# See Sections 35-36.
+# ============================================================================
+
+local_poc:
+  sink: "logs/enterprise-devops-audit.jsonl"
+  format: "JSON Lines (one JSON object per line)"
+  append_only: true
+
+record_required_fields:
+  - timestamp            # ISO-8601 UTC
+  - operationId
+  - user
+  - system                # bitbucket | jira | confluence | jfrog | github
+  - systemVersion          # verified/detected version, or "unknown"
+  - resource
+  - operation
+  - target
+  - executionMechanism     # mcp | rest-api | fallback-skill | powershell | bash
+  - skill
+  - script                 # path or null
+  - scriptVersion          # semver or null
+  - risk                   # READ_ONLY | WRITE | DESTRUCTIVE | ADMINISTRATIVE | SECURITY_SENSITIVE
+  - approvalRequired        # boolean
+  - approvalStatus          # NOT_REQUIRED | PENDING | APPROVED | DENIED | EXPIRED
+  - result                  # SUCCESS | FAILURE | UNKNOWN
+  - verification             # CONFIRMED | FAILED | UNKNOWN
+  - error                    # string or null
+
+never_log_fields:
+  - password
+  - token
+  - Authorization
+  - cookie
+  - private key
+  - client secret
+  - refresh token
+
+redaction_rule: >
+  Any field value that matches a credential-shaped pattern (e.g. Bearer
+  <token>, Basic <base64>, "ghp_", "glpat-", JWT-shaped strings) MUST be
+  redacted to "[REDACTED]" before being written to the audit record, even
+  if the field is not one of the named sensitive fields above.
+
+example_record: |
+  {
+    "timestamp": "2026-10-07T10:30:00Z",
+    "operationId": "op-12345",
+    "user": "user",
+    "system": "jfrog",
+    "systemVersion": "verified-version",
+    "resource": "artifact",
+    "operation": "DELETE",
+    "target": "releases-local/example/app.jar",
+    "executionMechanism": "mcp",
+    "skill": "jfrog-cleanup",
+    "script": null,
+    "scriptVersion": null,
+    "risk": "CRITICAL",
+    "approvalRequired": true,
+    "approvalStatus": "APPROVED",
+    "result": "SUCCESS",
+    "verification": "CONFIRMED",
+    "error": null
+  }
+
+production:
+  pipeline: "Agent -> Audit Event -> Central Logging -> SIEM"
+  guidance: >
+    Document possible integration with enterprise logging platforms
+    without requiring a specific vendor. Typical mechanisms: forwarding
+    logs/*.jsonl via a log shipper (e.g. an OS-level log agent) to the
+    organization's existing log pipeline, or emitting audit events
+    directly to a syslog/HTTP collector endpoint supplied via
+    environment configuration. Tamper-evidence (write-once storage,
+    hash-chaining, or SIEM-side integrity monitoring) is a production
+    requirement, not a POC requirement.
+
+tampering_prevention:
+  - No Skill or script truncates or rewrites existing lines in the audit
+    log; only appends.
+  - logs/*.jsonl is gitignored (Section 11) -- it is runtime state, not
+    source-controlled content.
