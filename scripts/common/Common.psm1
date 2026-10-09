@@ -75,7 +75,7 @@ function Read-LocalSecret {
         written to the console, a log file, or an audit record.
     #>
     param(
-        [Parameter(Mandatory = $true)][ValidateSet('bitbucket', 'jfrog', 'github')]
+        [Parameter(Mandatory = $true)][ValidateSet('bitbucket', 'jfrog', 'github', 'sonarqube')]
         [string]$System
     )
 
@@ -332,6 +332,17 @@ function Write-AuditLog {
 # Secure HTTP (Section 27 / 29 - TLS verification must never be disabled)
 # ----------------------------------------------------------------------------
 function Invoke-SecureRestMethod {
+    <#
+        -BodyEncoding controls how $Body (a hashtable) is serialized:
+        'Json' (default) -- every existing caller (Bitbucket, JFrog, Jira,
+        Confluence, GitHub) expects a JSON request body and is unaffected.
+        'Form' -- application/x-www-form-urlencoded, key=value pairs,
+        URL-encoded. Required for SonarQube's v1 Web API (api/projects/*,
+        api/issues/*, api/qualitygates/*, api/hotspots/*, api/webhooks/*),
+        which -- unlike every other system in this framework -- does NOT
+        accept a JSON POST body; only api/v2/* SonarQube endpoints do.
+        $null/empty values in $Body are omitted from the form body.
+    #>
     param(
         [Parameter(Mandatory = $true)][string]$Uri,
         [Parameter(Mandatory = $true)][ValidateSet('GET', 'POST', 'PUT', 'PATCH', 'DELETE')]
@@ -339,6 +350,7 @@ function Invoke-SecureRestMethod {
         [System.Security.SecureString]$Token,
         [string]$AuthScheme = "Bearer",
         $Body = $null,
+        [ValidateSet('Json', 'Form')][string]$BodyEncoding = 'Json',
         [int]$TimeoutSec = 30
     )
 
@@ -369,8 +381,20 @@ function Invoke-SecureRestMethod {
     }
 
     if ($null -ne $Body) {
-        $params["Body"] = ($Body | ConvertTo-Json -Depth 10)
-        $params["ContentType"] = "application/json"
+        if ($BodyEncoding -eq 'Form') {
+            $pairs = foreach ($key in $Body.Keys) {
+                $value = $Body[$key]
+                if ($null -ne $value -and [string]$value -ne '') {
+                    "$key=$([uri]::EscapeDataString([string]$value))"
+                }
+            }
+            $params["Body"] = ($pairs -join '&')
+            $params["ContentType"] = "application/x-www-form-urlencoded"
+        }
+        else {
+            $params["Body"] = ($Body | ConvertTo-Json -Depth 10)
+            $params["ContentType"] = "application/json"
+        }
     }
 
     try {

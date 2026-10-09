@@ -1,6 +1,6 @@
 ---
 name: bitbucket-admin
-description: Bitbucket Data Center 9.4.5 instance-level administration -- global settings, license/application properties inspection, system-wide configuration discovery. Use for instance-wide (not project- or repo-scoped) Bitbucket administration questions.
+description: Bitbucket Data Center instance-level administration -- global settings, license/application properties inspection, system-wide configuration discovery. Use for instance-wide (not project- or repo-scoped) Bitbucket administration questions.
 license: Proprietary - internal enterprise use
 ---
 
@@ -89,6 +89,8 @@ instance capabilities were at a point in time.
 
 ```
 User: What Bitbucket version is running?
-Agent: GET /rest/api/1.0/application-properties -> reports verified version,
-       compares against the pinned target (9.4.5) and warns if different.
+Agent: GET /rest/api/1.0/application-properties -> reports the detected
+       version (all Bitbucket Data Center versions are supported), compares
+       against the documented reference baseline purely for informational
+       drift-tracking, and warns if different.
 ```

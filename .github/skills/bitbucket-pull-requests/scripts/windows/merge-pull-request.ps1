@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    WRITE: Merges a Bitbucket Data Center 9.4.5 pull request via the
+    WRITE: Merges a Bitbucket Data Center pull request via the
     REST API fallback. Requires a pre-issued, matching "APPROVE MERGE"
     approval record. Does not attempt to bypass server-side merge
     checks (required approvals/builds) -- a 409 from Bitbucket is
@@ -59,7 +59,7 @@ $approval = Test-ApprovalToken -OperationId $OperationId -System "bitbucket" `
 
 if (-not $approval.Valid) {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "pull_request" -Operation "MERGE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "pull_request" -Operation "MERGE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-pull-requests" `
         -Script "merge-pull-request.ps1" -ScriptVersion $ScriptVersion `
         -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "DENIED" `
@@ -79,7 +79,7 @@ try {
         }
         catch {
             Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-                -SystemVersion "9.4.5" -Resource "pull_request" -Operation "MERGE" -Target $target `
+                -SystemVersion "runtime-detected" -Resource "pull_request" -Operation "MERGE" -Target $target `
                 -ExecutionMechanism "rest-api" -Skill "bitbucket-pull-requests" `
                 -Script "merge-pull-request.ps1" -ScriptVersion $ScriptVersion `
                 -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `
@@ -99,7 +99,7 @@ try {
         catch { $verification = "UNKNOWN" }
 
         Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-            -SystemVersion "9.4.5" -Resource "pull_request" -Operation "MERGE" -Target $target `
+            -SystemVersion "runtime-detected" -Resource "pull_request" -Operation "MERGE" -Target $target `
             -ExecutionMechanism "rest-api" -Skill "bitbucket-pull-requests" `
             -Script "merge-pull-request.ps1" -ScriptVersion $ScriptVersion `
             -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `

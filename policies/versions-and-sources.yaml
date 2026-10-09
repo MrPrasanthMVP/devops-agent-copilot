@@ -19,12 +19,36 @@
 # To bump a version or change a URL: edit ONLY this file, then run
 # scripts/validation/validate-versions.ps1 (or .sh) to find every place
 # that still needs a matching manual edit (CI runs this automatically).
+#
+# Version-support policy (applies to every system below unless a section
+# says otherwise): support ALL versions of the product, not one pinned
+# release. NEVER hard-code a version into runtime logic. Where the
+# product is self-managed/on-prem, discover the actual running version
+# at call time (see each system's get-version script where one exists)
+# and re-verify REST/Web-API/MCP tool-shape compatibility against that
+# system's official_docs for the specific detected version before
+# relying on version-specific behavior. The `reference_version_*` fields
+# below are an informational drift-tracking baseline only — never a
+# restriction.
 # ============================================================================
+
+document_version: "2.0.0"
+document_version_updated_at: "2026-10-09"
 
 bitbucket:
   product: "Bitbucket Data Center"
-  pinned_target_version: "9.4.5"
-  rule: "Never use Bitbucket 10.x API shapes against this target."
+  supported_version_range: "9.x and 10.x (all Bitbucket Data Center self-managed releases in both major version lines)"
+  version_policy: >
+    Support ALL Bitbucket Data Center 9.x and 10.x releases — no single
+    patch version is pinned or treated as more authoritative than
+    another. NEVER hard-code a version into runtime logic. Discover the
+    actual running version at call time via GET
+    /rest/api/1.0/application-properties
+    (scripts/bitbucket/get-version.ps1/.sh), confirm its major version is
+    9 or 10, and re-verify REST API/MCP tool-shape compatibility against
+    official_docs for that specific detected version before relying on
+    version-specific behavior — 9.x and 10.x are not assumed to share the
+    same API/MCP shapes.
   official_docs:
     rest_api: "https://developer.atlassian.com/server/bitbucket/rest/"
     mcp_for_bitbucket_dc: "https://confluence.atlassian.com/bitbucketserver/mcp-for-bitbucket-dc-1822723926.html"
@@ -36,6 +60,7 @@ bitbucket:
 jira:
   product: "Jira Cloud"
   pinned_target_version: "cloud (continuously deployed — no fixed version to pin)"
+  supported_version_range: "all (Cloud only; always the current continuously-deployed release)"
   official_docs:
     rest_api_v3: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/"
     rest_api_v3_permission_schemes: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-permission-schemes/"
@@ -54,6 +79,7 @@ jira:
 confluence:
   product: "Confluence Cloud"
   pinned_target_version: "cloud (continuously deployed — no fixed version to pin)"
+  supported_version_range: "all (Cloud only; always the current continuously-deployed release)"
   official_docs:
     rest_api_v2: "https://developer.atlassian.com/cloud/confluence/rest/v2/"
     rest_api_v2_spaces: "https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/"
@@ -62,6 +88,7 @@ confluence:
 
 jfrog:
   product: "JFrog Artifactory Self-Managed / On-Prem"
+  supported_version_range: "all Self-Managed/On-Prem releases"
   version_policy: >
     NEVER hard-code this value into runtime logic — it is recorded here
     purely as a documentation reference and MUST be re-verified against
@@ -88,7 +115,50 @@ jfrog:
   mcp_tool_catalog_verified_at_doc_version: "0.442"
   mcp_endpoint_pattern: "<JFROG_PLATFORM_URL>/mcp"
 
+sonarqube:
+  product: "SonarQube — both deployments supported: Server Community Build (Self-Managed / On-Prem) AND SonarQube Cloud (SaaS)"
+  product_note: >
+    SonarSource renamed the free, self-hosted, open-source edition from
+    "SonarQube Community Edition" to "SonarQube Community Build" in
+    October 2024 — same product, no license key, no designated
+    Long-Term-Availability version (rolling release cycle). Distinct from
+    the commercial "SonarQube Server" editions (Developer/Enterprise/Data
+    Center). "SonarQube Cloud" is the separate SaaS offering (formerly
+    "SonarCloud") — both are supported by this framework; resolve which
+    one via the -BaseUrl / -Organization script parameters, same pattern
+    as this framework's github.deployment (Cloud vs Server) resolution.
+  server:
+    supported_version_range: "all SonarQube Community Build Self-Managed releases"
+    version_policy: >
+      NEVER hard-code this value into runtime logic — it is recorded here
+      purely as a documentation reference and MUST be re-verified against
+      official_docs.release_notes at bump time. Discover the actual
+      running version at call time via GET /api/system/status (`version`
+      field) — scripts/sonarqube/get-version.ps1/.sh.
+    reference_version_at_generation_time: "26.9.0.129388"
+    reference_version_verified_at: "2026-10-09"
+    base_url: "<self-managed; no fixed value — supplied per-deployment>"
+  cloud:
+    supported_version_range: "all (continuously deployed SaaS; always the current release, like Jira/Confluence Cloud)"
+    base_url: "https://sonarcloud.io"
+    base_url_us_region: "https://sonarqube.us"
+    requires: "Organization key (-Organization) in addition to the user token — Cloud projects are addressed as '<org>_<projectKey>'."
+  official_docs:
+    docs_root: "https://docs.sonarsource.com/sonarqube-community-build/"
+    web_api: "https://docs.sonarsource.com/sonarqube-community-build/extension-guide/web-api"
+    release_notes: "https://docs.sonarsource.com/sonarqube-community-build/server-update-and-maintenance/release-notes"
+    community_build_overview: "https://www.sonarsource.com/open-source-editions/sonarqube-community-edition/"
+    cloud_web_api: "https://docs.sonarsource.com/sonarqube-cloud/appendices/web-api"
+    mcp_server_repo: "https://github.com/SonarSource/sonarqube-mcp-server"
+  mcp_server: "Official SonarQube MCP Server (SonarSource) — container image sonarsource/sonarqube-mcp; supports BOTH SonarQube Server/Community Build and SonarQube Cloud (stdio by default, HTTP/HTTPS mode via SONARQUBE_TRANSPORT); pin a version tag (e.g. sonarsource/sonarqube-mcp:1.19.0.2785) for reproducible deployments."
+  mcp_env_vars:
+    token: "SONARQUBE_TOKEN (required, both deployments)"
+    server_url: "SONARQUBE_URL (required for Server; also used for the Cloud US region: https://sonarqube.us)"
+    cloud_org: "SONARQUBE_ORG (required for Cloud, except US region which uses SONARQUBE_URL)"
+    transport: "SONARQUBE_TRANSPORT=http|https (optional; defaults to stdio)"
+
 github:
+  supported_version_range: "all (Enterprise Cloud and Enterprise Server releases; resolved per-call from github.deployment config, never assumed interchangeable)"
   official_docs:
     root: "https://docs.github.com/"
     copilot: "https://docs.github.com/en/copilot/"
@@ -131,6 +201,7 @@ github:
     self-hosted github-mcp-server build against the Server hostname.
 
 vscode:
+  supported_version_range: "all current VS Code stable releases"
   official_docs:
     root: "https://code.visualstudio.com/docs/"
     mcp_servers: "https://code.visualstudio.com/docs/agent-customization/mcp-servers"

@@ -1,0 +1,9 @@
+# Jira/Confluence Cloud - Local POC account email (paired with jira-token.txt)
+#
+# Atlassian Cloud REST APIs authenticate Basic-Auth style as
+# "email:api_token" -- see
+# https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
+#
+# Copy to "jira-email.txt" (no .example suffix, gitignored, never committed).
+# Format: the raw email address only.
+REPLACE_WITH_REAL_ATLASSIAN_ACCOUNT_EMAIL

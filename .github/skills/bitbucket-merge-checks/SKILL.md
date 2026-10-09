@@ -1,6 +1,6 @@
 ---
 name: bitbucket-merge-checks
-description: View and change Bitbucket Data Center 9.4.5 merge check requirements (minimum approvals, required builds, unresolved-tasks check) that gate whether a pull request can be merged. Use for requests about required reviewers/approvals or required build status before merge.
+description: View and change Bitbucket Data Center merge check requirements (minimum approvals, required builds, unresolved-tasks check) that gate whether a pull request can be merged. Use for requests about required reviewers/approvals or required build status before merge.
 license: Proprietary - internal enterprise use
 ---
 

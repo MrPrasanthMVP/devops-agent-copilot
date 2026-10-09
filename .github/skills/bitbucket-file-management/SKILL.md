@@ -1,6 +1,6 @@
 ---
 name: bitbucket-file-management
-description: Browse files/directories and commit file changes directly to a Bitbucket Data Center 9.4.5 repository branch (without a local clone). Use for requests to view a file's content, list a directory, or commit a file change directly via the API/MCP.
+description: Browse files/directories and commit file changes directly to a Bitbucket Data Center repository branch (without a local clone). Use for requests to view a file's content, list a directory, or commit a file change directly via the API/MCP.
 license: Proprietary - internal enterprise use
 ---
 

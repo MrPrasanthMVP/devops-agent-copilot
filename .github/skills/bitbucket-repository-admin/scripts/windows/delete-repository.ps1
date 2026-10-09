@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    DESTRUCTIVE: Permanently deletes a Bitbucket Data Center 9.4.5
+    DESTRUCTIVE: Permanently deletes a Bitbucket Data Center
     repository via the REST API fallback. Requires a pre-issued,
     matching "APPROVE DELETE" approval record.
 
@@ -53,7 +53,7 @@ $approval = Test-ApprovalToken -OperationId $OperationId -System "bitbucket" `
 
 if (-not $approval.Valid) {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "DELETE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "DELETE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "delete-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "DESTRUCTIVE" -ApprovalRequired $true -ApprovalStatus "DENIED" `
@@ -81,7 +81,7 @@ try {
         }
 
         Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-            -SystemVersion "9.4.5" -Resource "repository" -Operation "DELETE" -Target $target `
+            -SystemVersion "runtime-detected" -Resource "repository" -Operation "DELETE" -Target $target `
             -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
             -Script "delete-repository.ps1" -ScriptVersion $ScriptVersion `
             -Risk "DESTRUCTIVE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `
@@ -98,7 +98,7 @@ try {
 }
 catch {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "DELETE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "DELETE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "delete-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "DESTRUCTIVE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `

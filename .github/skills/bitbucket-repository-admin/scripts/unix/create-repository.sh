@@ -49,7 +49,7 @@ APPROVAL_STATUS=$?
 set -e
 
 if [[ $APPROVAL_STATUS -ne 0 ]]; then
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "CREATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "CREATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "create-repository.sh" "$SCRIPT_VERSION" \
     "WRITE" true "DENIED" "DENIED" "NOT_APPLICABLE" "$APPROVAL_OUTPUT"
   echo "$APPROVAL_OUTPUT" >&2
@@ -74,7 +74,7 @@ if invoke_secure_rest POST "$COLLECTION_URI" "$TOKEN" "Bearer" "$BODY" >/dev/nul
     if [[ "$SLUG" == "$REPO_SLUG" ]]; then VERIFICATION="CONFIRMED"; RESULT="SUCCESS"; fi
   fi
 
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "CREATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "CREATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "create-repository.sh" "$SCRIPT_VERSION" \
     "WRITE" true "APPROVED" "$RESULT" "$VERIFICATION" "null"
 
@@ -84,7 +84,7 @@ if invoke_secure_rest POST "$COLLECTION_URI" "$TOKEN" "Bearer" "$BODY" >/dev/nul
   [[ "$VERIFICATION" != "CONFIRMED" ]] && exit "$EXIT_VERIFICATION_FAILURE"
   exit "$EXIT_SUCCESS"
 else
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "CREATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "CREATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "create-repository.sh" "$SCRIPT_VERSION" \
     "WRITE" true "APPROVED" "FAILURE" "UNKNOWN" "request failed"
   echo "ERROR: failed to create repository '$TARGET'" >&2

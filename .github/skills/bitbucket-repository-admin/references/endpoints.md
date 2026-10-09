@@ -12,5 +12,7 @@ Source: https://developer.atlassian.com/server/bitbucket/rest/ (API base
 | Get default branch | GET | `/rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/branches/default` | - |
 | Set default branch | PUT | `/rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/branches/default` | `{"id": "refs/heads/<branch>"}` |
 
-Do not use any Bitbucket 10.x-only endpoint against this 9.4.5 target
-without first confirming it is also documented for 9.x.
+All Bitbucket Data Center versions are supported. Do not use any
+version-specific endpoint (9.x-only or 10.x-only) without first
+confirming it against the detected version's own documentation
+(`GET /rest/api/1.0/application-properties`).

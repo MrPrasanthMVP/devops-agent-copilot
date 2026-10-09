@@ -11,6 +11,12 @@
       "id": "jfrog-token",
       "description": "JFrog Platform access token (Bearer). Never committed; stored by VS Code's secret storage.",
       "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "sonarqube-token",
+      "description": "SonarQube user token (Server/Community Build self-managed, or Cloud). Never committed; stored by VS Code's secret storage.",
+      "password": true
     }
   ],
   "servers": {
@@ -30,6 +36,15 @@
       "url": "https://artifactory.example.internal/mcp",
       "headers": {
         "Authorization": "Bearer ${input:jfrog-token}"
+      }
+    },
+    "sonarqube": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "--init", "--pull=always", "-i", "--rm", "-e", "SONARQUBE_TOKEN", "-e", "SONARQUBE_URL", "sonarsource/sonarqube-mcp"],
+      "env": {
+        "SONARQUBE_TOKEN": "${input:sonarqube-token}",
+        "SONARQUBE_URL": "https://sonarqube.example.internal"
       }
     },
     "github": {

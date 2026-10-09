@@ -4,7 +4,11 @@
 # ============================================================================
 
 # --- Local POC credentials (see Section 11 of the governing spec) ----------
-.github/local-secrets/
+# NOTE: must be "local-secrets/*" (not "local-secrets/") -- a directory-level
+# ignore stops git from ever descending into it, which silently defeats the
+# "!*.example" negation below and drops every token template from version
+# control (discovered 2026-10-09: none of the .example files were tracked).
+.github/local-secrets/*
 !.github/local-secrets/*.example
 
 # --- Audit / operational logs -----------------------------------------------

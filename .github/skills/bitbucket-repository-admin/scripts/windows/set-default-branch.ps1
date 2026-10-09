@@ -51,7 +51,7 @@ $approval = Test-ApprovalToken -OperationId $OperationId -System "bitbucket" `
 
 if (-not $approval.Valid) {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "UPDATE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "UPDATE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "set-default-branch.ps1" -ScriptVersion $ScriptVersion `
         -Risk "ADMINISTRATIVE" -ApprovalRequired $true -ApprovalStatus "DENIED" `
@@ -83,7 +83,7 @@ try {
         catch { $verification = "FAILED" }
 
         Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-            -SystemVersion "9.4.5" -Resource "repository" -Operation "UPDATE" -Target $target `
+            -SystemVersion "runtime-detected" -Resource "repository" -Operation "UPDATE" -Target $target `
             -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
             -Script "set-default-branch.ps1" -ScriptVersion $ScriptVersion `
             -Risk "ADMINISTRATIVE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `
@@ -101,7 +101,7 @@ try {
 }
 catch {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "UPDATE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "UPDATE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "set-default-branch.ps1" -ScriptVersion $ScriptVersion `
         -Risk "ADMINISTRATIVE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `

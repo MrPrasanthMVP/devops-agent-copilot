@@ -41,7 +41,7 @@ $failures = 0
 
 Write-Host "=== Check 1: every tracked-vendor URL used in the repo must be registered ==="
 
-$vendorPattern = "https://(docs\.github\.com|developer\.atlassian\.com|confluence\.atlassian\.com|docs\.jfrog\.com|jfrog\.com|code\.visualstudio\.com|mcp\.atlassian\.com|api\.githubcopilot\.com|github\.com/github/github-mcp-server)[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]*"
+$vendorPattern = "https://(docs\.github\.com|developer\.atlassian\.com|confluence\.atlassian\.com|docs\.jfrog\.com|jfrog\.com|docs\.sonarsource\.com|www\.sonarsource\.com|github\.com/SonarSource/sonarqube-mcp-server|code\.visualstudio\.com|mcp\.atlassian\.com|api\.githubcopilot\.com|github\.com/github/github-mcp-server)[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]*"
 
 $files = Get-ChildItem -Path $RepoRoot -Recurse -Include *.md, *.yaml, *.yml, *.json, *.ps1, *.sh, *.bats -File |
     Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' -and $_.FullName -notmatch '[\\/]node_modules[\\/]' }
@@ -70,8 +70,20 @@ function Extract([string]$pattern) {
     return $null
 }
 
-$bitbucketVersion = Extract 'pinned_target_version:\s*"([^"]+)"'
-$jfrogVersion = Extract 'reference_version_at_generation_time:\s*"([^"]+)"'
+# Section-scoped extraction: several systems (jfrog, sonarqube) share the
+# same field name (e.g. reference_version_at_generation_time), so a plain
+# whole-file regex would silently grab the wrong system's value. This
+# extracts only the text belonging to one top-level YAML section.
+function Extract-InSection([string]$section, [string]$pattern) {
+    $sectionMatch = [regex]::Match($registryContent, "(?ms)^$section`:.*?(?=^\S|\z)")
+    if ($sectionMatch.Success) {
+        $m = [regex]::Match($sectionMatch.Value, $pattern)
+        if ($m.Success) { return $m.Groups[1].Value }
+    }
+    return $null
+}
+
+$jfrogVersion = Extract-InSection 'jfrog' 'reference_version_at_generation_time:\s*"([^"]+)"'
 $rovoEndpoint = Extract 'mcp_endpoint:\s*"([^"]+)"'
 $githubHostedEndpoint = Extract 'mcp_hosted_endpoint_cloud:\s*"([^"]+)"'
 $bitbucketMcpPattern = Extract 'mcp_endpoint_pattern:\s*"([^"]+)"'
@@ -97,7 +109,6 @@ function Check-Contains([string]$label, [string]$relativePath, [string]$needle) 
     }
 }
 
-Check-Contains "bitbucket pinned version" "README.md" $bitbucketVersion
 Check-Contains "jfrog reference version" "README.md" $jfrogVersion
 Check-Contains "rovo mcp endpoint (.mcp.json)" ".mcp.json" $rovoEndpoint
 Check-Contains "rovo mcp endpoint (vscode)" ".vscode/mcp.json" $rovoEndpoint

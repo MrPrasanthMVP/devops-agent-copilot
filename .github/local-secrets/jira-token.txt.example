@@ -1,0 +1,12 @@
+# Jira/Confluence Cloud - Local POC API Token (REST fallback only)
+#
+# Only needed if you exercise the REST API fallback path for
+# jira-issues / confluence-pages (the primary path is the Atlassian Rovo
+# MCP Server, which uses interactive OAuth and needs no token file).
+#
+# Copy to "jira-token.txt" (no .example suffix, gitignored, never
+# committed). Create at https://id.atlassian.com/manage-profile/security/api-tokens .
+# Shared with Confluence Cloud REST calls against the same Atlassian site.
+#
+# Format: the raw API token value only.
+REPLACE_WITH_REAL_ATLASSIAN_API_TOKEN

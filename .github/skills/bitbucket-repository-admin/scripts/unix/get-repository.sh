@@ -43,13 +43,13 @@ URI="$BASE_URL/rest/api/1.0/projects/$PROJECT_KEY/repos/$REPO_SLUG"
 TOKEN="$(read_local_secret bitbucket)"
 
 if RESPONSE="$(invoke_secure_rest GET "$URI" "$TOKEN")"; then
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "GET" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "GET" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "get-repository.sh" "$SCRIPT_VERSION" \
     "READ_ONLY" false "NOT_REQUIRED" "SUCCESS" "NOT_APPLICABLE" "null"
   echo "$RESPONSE"
   exit "$EXIT_SUCCESS"
 else
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "GET" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "GET" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "get-repository.sh" "$SCRIPT_VERSION" \
     "READ_ONLY" false "NOT_REQUIRED" "FAILURE" "NOT_APPLICABLE" "request failed"
   echo "ERROR: failed to retrieve repository '$TARGET'" >&2

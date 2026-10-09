@@ -1,6 +1,6 @@
 ---
 name: bitbucket-repository-admin
-description: Create, read, update, and delete Bitbucket Data Center 9.4.5 repositories (including default branch changes and repository-level settings). Use for any request that creates, renames, archives, configures, or deletes a Bitbucket repository.
+description: Create, read, update, and delete Bitbucket Data Center repositories (including default branch changes and repository-level settings). Use for any request that creates, renames, archives, configures, or deletes a Bitbucket repository.
 license: Proprietary - internal enterprise use
 ---
 
@@ -42,7 +42,7 @@ operation (e.g. DELETE), fall back to the REST API below.
 
 ## API fallback
 
-Bitbucket Server/Data Center REST API 1.0, target version **9.4.5**
+Bitbucket Server/Data Center REST API 1.0, **all versions supported**
 (`https://developer.atlassian.com/server/bitbucket/rest/`):
 
 - `GET /rest/api/1.0/projects/{projectKey}/repos` — list

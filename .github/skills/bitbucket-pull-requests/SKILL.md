@@ -1,6 +1,6 @@
 ---
 name: bitbucket-pull-requests
-description: Create, review, comment on, and merge Bitbucket Data Center 9.4.5 pull requests. Use for any request to open a PR, list/inspect PRs, add a review/comment, approve a PR, or merge a PR.
+description: Create, review, comment on, and merge Bitbucket Data Center pull requests. Use for any request to open a PR, list/inspect PRs, add a review/comment, approve a PR, or merge a PR.
 license: Proprietary - internal enterprise use
 ---
 

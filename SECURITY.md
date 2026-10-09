@@ -20,11 +20,11 @@ tokens, or production hostnames in any report.
 - **Authenticated enterprise users** interacting via GitHub Copilot in
   VS Code or Copilot CLI, routed through the Enterprise DevOps Agent.
 - **Compromised or malicious content** inside Bitbucket repositories,
-  Jira issues, Confluence pages, Artifactory metadata, or GitHub
-  issues/PRs/discussions - this content is attacker-reachable even when
-  every human user is honest.
+  Jira issues, Confluence pages, Artifactory metadata, SonarQube issue/
+  hotspot comments, or GitHub issues/PRs/discussions - this content is
+  attacker-reachable even when every human user is honest.
 - **MCP servers** - first-party (Bitbucket DC MCP, Atlassian Rovo MCP,
-  JFrog MCP, GitHub MCP) and, if ever added, third-party.
+  JFrog MCP, SonarQube MCP, GitHub MCP) and, if ever added, third-party.
 - **Scripts** - the PowerShell/Bash fallback implementations under
   `.github/skills/*/scripts/`.
 
@@ -32,7 +32,7 @@ tokens, or production hostnames in any report.
 
 - Enterprise source code, issue data, documentation, build artifacts,
   and platform configuration (permissions, branch protection, webhooks,
-  CI/CD secrets) across all five integrated systems.
+  CI/CD secrets) across all six integrated systems.
 - Local POC credentials in `.github/local-secrets/` and, in production,
   whatever credential-broker/secret-manager tokens replace them.
 - The audit trail (`logs/enterprise-devops-audit.jsonl` locally;

@@ -1,0 +1,13 @@
+# GitHub Enterprise (Cloud or Server) - Local POC Token
+#
+# Copy to "github-token.txt" (no .example suffix). That file is
+# gitignored and MUST NEVER be committed. LOCAL POC USE ONLY.
+#
+# Recommended: a fine-grained personal access token, or a GitHub App
+# installation token if you have one set up, scoped to only the
+# organization(s)/repositories you intend to exercise in the POC.
+# Production deployments MUST replace this with a GitHub App +
+# installation-token flow (Section 12/49) rather than a long-lived PAT.
+#
+# Format: the raw token value only.
+REPLACE_WITH_REAL_GITHUB_TOKEN

@@ -48,7 +48,7 @@ try {
     $projects = Invoke-SecureRestMethod -Uri $uri -Method GET -Token $token
 
     Write-AuditLog -OperationId $operationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "project" -Operation "LIST" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "project" -Operation "LIST" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-project-admin" `
         -Script "list-projects.ps1" -ScriptVersion $ScriptVersion `
         -Risk "READ_ONLY" -ApprovalRequired $false -ApprovalStatus "NOT_REQUIRED" `
@@ -59,7 +59,7 @@ try {
 }
 catch {
     Write-AuditLog -OperationId $operationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "project" -Operation "LIST" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "project" -Operation "LIST" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-project-admin" `
         -Script "list-projects.ps1" -ScriptVersion $ScriptVersion `
         -Risk "READ_ONLY" -ApprovalRequired $false -ApprovalStatus "NOT_REQUIRED" `

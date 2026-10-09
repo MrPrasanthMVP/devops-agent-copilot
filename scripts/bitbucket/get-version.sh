@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 #
 # Purpose:        READ-ONLY: Discover the running Bitbucket Data Center
-#                 version and warn if it differs from the pinned target
-#                 (9.4.5). Mandatory version discovery per Section 38.
+#                 version. ALL Bitbucket Data Center 9.x and 10.x
+#                 releases are supported -- this reports the detected
+#                 version and flags it only if its major version falls
+#                 outside 9.x/10.x (informational; never a hard
+#                 restriction on the operation itself). Mandatory
+#                 version discovery per Section 38.
 # Supported OS:   Linux, macOS (Bash).
 # Dependencies:   bash, curl, jq.
 # Authentication: Bitbucket HTTP access token (Bearer).
@@ -10,7 +14,7 @@
 # API/MCP dependency: REST fallback -- GET /rest/api/1.0/application-properties
 # Exit codes:     0 success, 1 general failure, 3 auth failure,
 #                 10 configuration error.
-# Output:         JSON: {version, buildNumber, matchesTarget}
+# Output:         JSON: {version, buildNumber, supportedMajorRange, inSupportedRange}
 # Security:       TLS validation always on (no disabled certificate verification).
 #
 # Example:
@@ -20,13 +24,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOKEN_FILE="$REPO_ROOT/.github/local-secrets/bitbucket-token.txt"
 
-# Single source of truth: policies/versions-and-sources.yaml#bitbucket.pinned_target_version
-PINNED_TARGET="9.4.5"
-VERSIONS_FILE="$REPO_ROOT/policies/versions-and-sources.yaml"
-if [[ -f "$VERSIONS_FILE" ]]; then
-    EXTRACTED=$(grep -oP 'pinned_target_version:\s*"\K[^"]+' "$VERSIONS_FILE" 2>/dev/null | head -1 || true)
-    [[ -n "$EXTRACTED" ]] && PINNED_TARGET="$EXTRACTED"
-fi
+# Single source of truth: policies/versions-and-sources.yaml#bitbucket.supported_version_range
+# ALL Bitbucket Data Center 9.x and 10.x releases are supported; no
+# single patch version is pinned.
 BASE_URL=""
 
 while [[ $# -gt 0 ]]; do
@@ -54,13 +54,14 @@ if [[ "$HTTP_CODE" == "401" ]]; then echo "ERROR: Authentication failure." >&2; 
 
 VERSION=$(jq -r '.version' "$RESP_FILE")
 BUILD=$(jq -r '.buildNumber' "$RESP_FILE")
-MATCHES="false"
-[[ "$VERSION" == "$PINNED_TARGET" ]] && MATCHES="true"
+MAJOR_VERSION="${VERSION%%.*}"
+IN_RANGE="false"
+[[ "$MAJOR_VERSION" == "9" || "$MAJOR_VERSION" == "10" ]] && IN_RANGE="true"
 
-if [[ "$MATCHES" == "false" ]]; then
-    echo "WARNING: Detected Bitbucket version '$VERSION' differs from the pinned target '$PINNED_TARGET'. Re-verify REST API compatibility before relying on 9.4.5-specific behavior." >&2
+if [[ "$IN_RANGE" == "false" ]]; then
+    echo "WARNING: Detected Bitbucket version '$VERSION' is outside the supported major-version range (9.x and 10.x). This is informational only; re-verify REST API/MCP compatibility before relying on this framework's Bitbucket integration against it." >&2
 fi
 
-jq -n --arg version "$VERSION" --arg buildNumber "$BUILD" --argjson matchesTarget "$MATCHES" \
-    '{version:$version, buildNumber:$buildNumber, matchesTarget:$matchesTarget}'
+jq -n --arg version "$VERSION" --arg buildNumber "$BUILD" --arg supportedMajorRange "9.x-10.x" --argjson inSupportedRange "$IN_RANGE" \
+    '{version:$version, buildNumber:$buildNumber, supportedMajorRange:$supportedMajorRange, inSupportedRange:$inSupportedRange}'
 exit 0

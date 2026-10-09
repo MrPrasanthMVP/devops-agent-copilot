@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # merge-pull-request.sh
 #
-# Purpose: WRITE -- merges a Bitbucket Data Center 9.4.5 pull request
+# Purpose: WRITE -- merges a Bitbucket Data Center pull request
 #   via the REST API fallback. Requires a pre-issued, matching
 #   "APPROVE MERGE" approval record. Never attempts to bypass
 #   server-side merge checks.
@@ -59,7 +59,7 @@ OPERATION_KEY="bitbucket.pull_request.merge"
 
 VALIDATION=$(test_approval_token "$OPERATION_ID" "bitbucket" "$TARGET" "$OPERATION_KEY" "APPROVE MERGE") || true
 if [[ "$VALIDATION" != "VALID" ]]; then
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "pull_request" "MERGE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "pull_request" "MERGE" "$TARGET" \
     "rest-api" "bitbucket-pull-requests" "merge-pull-request.sh" "$SCRIPT_VERSION" \
     "WRITE" "true" "DENIED" "DENIED" "NOT_APPLICABLE" "${VALIDATION#INVALID: }"
   echo "ERROR: Approval check failed: ${VALIDATION#INVALID: }" >&2
@@ -77,7 +77,7 @@ fi
 if ! invoke_secure_rest POST "$PR_URI/merge?version=$PR_VERSION" "$TOKEN" "Bearer" "" >/dev/null 2>/tmp/bb_merge_err.$$; then
   ERR_MSG="$(cat /tmp/bb_merge_err.$$ 2>/dev/null || echo 'unknown error')"
   rm -f /tmp/bb_merge_err.$$
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "pull_request" "MERGE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "pull_request" "MERGE" "$TARGET" \
     "rest-api" "bitbucket-pull-requests" "merge-pull-request.sh" "$SCRIPT_VERSION" \
     "WRITE" "true" "APPROVED" "FAILURE" "NOT_APPLICABLE" "$ERR_MSG"
   echo "ERROR: Merge checks not satisfied, version conflict, or request failed: $ERR_MSG" >&2
@@ -93,7 +93,7 @@ STATE=$(echo "$PR_JSON" | jq -r '.state // "UNKNOWN"')
 VERIFICATION="FAILED"; RESULT="UNKNOWN"
 if [[ "$STATE" == "MERGED" ]]; then VERIFICATION="CONFIRMED"; RESULT="SUCCESS"; fi
 
-write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "pull_request" "MERGE" "$TARGET" \
+write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "pull_request" "MERGE" "$TARGET" \
   "rest-api" "bitbucket-pull-requests" "merge-pull-request.sh" "$SCRIPT_VERSION" \
   "WRITE" "true" "APPROVED" "$RESULT" "$VERIFICATION" "null"
 

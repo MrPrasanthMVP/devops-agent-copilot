@@ -58,7 +58,7 @@ new_operation_id() {
 # Secret handling (Section 11 / 28 / 35 - never print, never log credentials)
 # ----------------------------------------------------------------------------
 read_local_secret() {
-  # Usage: read_local_secret <bitbucket|jfrog|github>
+  # Usage: read_local_secret <bitbucket|jfrog|github|sonarqube>
   local system="$1"
   local root path
   root="$(repo_root)"
@@ -224,8 +224,14 @@ write_audit_log() {
 # Secure HTTP (Section 28 / 29 - TLS verification must never be disabled)
 # ----------------------------------------------------------------------------
 invoke_secure_rest() {
-  # Usage: invoke_secure_rest <METHOD> <URL> [token] [authScheme] [jsonBody]
-  local method="$1" url="$2" token="${3:-}" auth_scheme="${4:-Bearer}" body="${5:-}"
+  # Usage: invoke_secure_rest <METHOD> <URL> [token] [authScheme] [body] [contentType]
+  # contentType defaults to application/json -- every existing caller
+  # (Bitbucket, JFrog, Jira, Confluence, GitHub) is unaffected. Pass
+  # "application/x-www-form-urlencoded" (with a body built by
+  # build_form_body, below) for SonarQube's v1 Web API, which -- unlike
+  # every other system in this framework -- does NOT accept a JSON POST
+  # body; only api/v2/* SonarQube endpoints do.
+  local method="$1" url="$2" token="${3:-}" auth_scheme="${4:-Bearer}" body="${5:-}" content_type="${6:-application/json}"
 
   if [[ "$url" != https://* ]]; then
     echo "ERROR: refusing to call a non-HTTPS endpoint: $url" >&2
@@ -238,12 +244,30 @@ invoke_secure_rest() {
     curl_args+=(-H "Authorization: ${auth_scheme} ${token}")
   fi
   if [[ -n "$body" ]]; then
-    curl_args+=(-H "Content-Type: application/json" --data "$body")
+    curl_args+=(-H "Content-Type: ${content_type}" --data "$body")
   fi
   curl_args+=("$url")
 
   # Never add -k / --insecure here. TLS verification stays enabled.
   curl "${curl_args[@]}"
+}
+
+build_form_body() {
+  # Usage: build_form_body key1 val1 [key2 val2 ...]
+  # Builds an application/x-www-form-urlencoded string (key=value&key=value),
+  # URL-encoding each value via jq's @uri filter. Pairs whose value is empty
+  # are omitted entirely (mirrors Invoke-SecureRestMethod -BodyEncoding Form
+  # in Common.psm1 skipping null/empty values).
+  local out="" key val encoded
+  while [[ $# -gt 0 ]]; do
+    key="$1" val="${2:-}"
+    shift 2 || shift $#
+    [[ -z "$val" ]] && continue
+    encoded="$(jq -rn --arg v "$val" '$v|@uri')"
+    if [[ -n "$out" ]]; then out+="&"; fi
+    out+="${key}=${encoded}"
+  done
+  echo "$out"
 }
 
 get_operation_classification() {

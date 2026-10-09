@@ -51,7 +51,7 @@ $approval = Test-ApprovalToken -OperationId $OperationId -System "bitbucket" `
 
 if (-not $approval.Valid) {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "CREATE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "CREATE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "create-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "DENIED" `
@@ -89,7 +89,7 @@ try {
         }
 
         Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-            -SystemVersion "9.4.5" -Resource "repository" -Operation "CREATE" -Target $target `
+            -SystemVersion "runtime-detected" -Resource "repository" -Operation "CREATE" -Target $target `
             -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
             -Script "create-repository.ps1" -ScriptVersion $ScriptVersion `
             -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `
@@ -107,7 +107,7 @@ try {
 }
 catch {
     Write-AuditLog -OperationId $OperationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "CREATE" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "CREATE" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "create-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "WRITE" -ApprovalRequired $true -ApprovalStatus "APPROVED" `

@@ -1,6 +1,6 @@
 ---
 name: bitbucket-webhooks
-description: View, create, update, and delete Bitbucket Data Center 9.4.5 repository webhooks (outbound HTTP notifications on repo/PR events). Use for any request to add, change, remove, or inspect a Bitbucket webhook.
+description: View, create, update, and delete Bitbucket Data Center repository webhooks (outbound HTTP notifications on repo/PR events). Use for any request to add, change, remove, or inspect a Bitbucket webhook.
 license: Proprietary - internal enterprise use
 ---
 

@@ -15,6 +15,7 @@ never hand-edit a version or URL anywhere else).
    .github/local-secrets/bitbucket-token.txt.example  -> bitbucket-token.txt
    .github/local-secrets/jfrog-token.txt.example       -> jfrog-token.txt
    .github/local-secrets/github-token.txt.example      -> github-token.txt
+   .github/local-secrets/sonarqube-token.txt.example   -> sonarqube-token.txt
    .github/local-secrets/jira-email.txt.example        -> jira-email.txt   (only if using the Jira/Confluence REST fallback)
    .github/local-secrets/jira-token.txt.example        -> jira-token.txt   (only if using the Jira/Confluence REST fallback)
    ```
@@ -22,7 +23,10 @@ never hand-edit a version or URL anywhere else).
    `.vscode/mcp.json` (`bitbucket.example.internal`,
    `artifactory.example.internal`) with your real Bitbucket/JFrog base
    URLs. The Atlassian Rovo and GitHub hosted MCP endpoints are already
-   correct — leave them as-is.
+   correct — leave them as-is. For SonarQube, fill in the `sonarqube`
+   entry's `env` block: `SONARQUBE_TOKEN` always, plus either
+   `SONARQUBE_URL` (Server/Community Build, self-managed) or
+   `SONARQUBE_ORG` (Cloud) — see `policies/versions-and-sources.yaml#sonarqube`.
 4. Run the validators once to confirm the repo is intact:
    ```
    ./scripts/validation/validate-repository.ps1   # or .sh
@@ -38,9 +42,9 @@ never hand-edit a version or URL anywhere else).
 2. In Copilot Chat, pick the **Enterprise DevOps Agent** from the agent
    picker (`.github/agents/enterprise-devops.agent.md`).
 3. The first time you touch an MCP server that needs a secret
-   (Bitbucket, JFrog), VS Code will prompt you for the token via the
-   `inputs` mechanism in `.vscode/mcp.json` — paste the same value you
-   put in the matching `.github/local-secrets/*.txt` file.
+   (Bitbucket, JFrog, SonarQube), VS Code will prompt you for the token
+   via the `inputs` mechanism in `.vscode/mcp.json` — paste the same
+   value you put in the matching `.github/local-secrets/*.txt` file.
 4. Try a read-only question first, e.g. *"list repositories in project
    ABC"* — this should answer directly, no approval prompt.
 
@@ -52,7 +56,11 @@ never hand-edit a version or URL anywhere else).
 3. Skills under `.github/skills/` are auto-discovered. MCP servers come
    from `.mcp.json` — add real bearer tokens for Bitbucket/JFrog via
    `copilot mcp add --header "Authorization: Bearer <token>"` at the CLI
-   (never paste a token into the committed `.mcp.json`).
+   (never paste a token into the committed `.mcp.json`). SonarQube's
+   entry is a local/stdio server (not HTTP), so its credential instead
+   goes in that entry's `env` block (`SONARQUBE_TOKEN` plus
+   `SONARQUBE_URL` or `SONARQUBE_ORG`) — edit your local, uncommitted
+   copy of `.mcp.json`, never the one tracked in git.
 
 ## 4. The core loop: every write follows the same pattern
 
@@ -99,6 +107,8 @@ isn't implemented rather than guessing. A few entry points:
 | Change branch protection | `github-branch-protection`, `bitbucket-branch-permissions` |
 | Clean up old/large JFrog artifacts | `jfrog-cleanup` |
 | Edit a Jira issue or Confluence page | `jira-issues`, `confluence-pages` |
+| Check/assign a SonarQube issue or hotspot | `sonarqube-issues`, `sonarqube-hotspots` |
+| Create/delete a SonarQube project or quality gate | `sonarqube-projects`, `sonarqube-quality-gates` |
 | Change who can access something | any `*-permissions` skill (always `SECURITY_SENSITIVE`) |
 
 ## 6. Checking what happened

@@ -3,7 +3,7 @@
 This top-level `tests/` tree holds **cross-skill / cross-system**
 integration-style tests (requirement.md Section 42/43), organized by
 system: `approval/`, `bitbucket/`, `jira/`, `confluence/`, `jfrog/`,
-`github/`.
+`sonarqube/`, `github/`.
 
 This is distinct from **per-skill unit tests**, which live next to each
 Skill at `.github/skills/<skill-name>/tests/` and are the primary,

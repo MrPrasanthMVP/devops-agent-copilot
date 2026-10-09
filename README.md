@@ -234,11 +234,12 @@ version or change a URL, edit that one file first.
 
 | System | Deployment | Version target |
 |---|---|---|
-| Bitbucket | Data Center | **9.4.5** exactly (never 10.x-only APIs) |
-| Jira | Cloud | current Cloud API (v3) |
-| Confluence | Cloud | current Cloud API (v2, legacy v1 only where explicitly noted) |
-| JFrog Artifactory | Self-Managed / On-Prem | runtime-discovered (never hardcoded); verified at generation time: 7.161.32 (2026-10-07) |
-| GitHub | Enterprise Cloud **or** Server | resolved from `github.deployment` config - Cloud and Server are never assumed interchangeable |
+| Bitbucket | Data Center | **all 9.x and 10.x versions supported**; runtime-discovered (never hardcoded) |
+| Jira | Cloud | all (continuously deployed); current Cloud API (v3) |
+| Confluence | Cloud | all (continuously deployed); current Cloud API (v2, legacy v1 only where explicitly noted) |
+| JFrog Artifactory | Self-Managed / On-Prem | **all versions supported**; runtime-discovered (never hardcoded); reference baseline verified at generation time: 7.161.32 (2026-10-07) |
+| SonarQube | Server Community Build, Self-Managed / On-Prem | **all versions supported**; runtime-discovered (never hardcoded); reference baseline verified at generation time: 26.9.0.129388 (2026-10-09) |
+| GitHub | Enterprise Cloud **or** Server | all releases; resolved from `github.deployment` config - Cloud and Server are never assumed interchangeable |
 
 ## MCP architecture
 
@@ -254,6 +255,9 @@ Primary integration path for every system, discovered and routed per
   (toolsets at generation time: Access, Artifactory, Security,
   Curation, Distribution, Evidence, AppTrust, Workers). The deprecated
   community project `jfrog/mcp-jfrog` is explicitly NOT used.
+- **SonarQube**: official **SonarQube MCP Server** (SonarSource,
+  container image `sonarsource/sonarqube-mcp`), supports self-managed
+  SonarQube Server/Community Build on-prem instances.
 - **GitHub**: the officially documented GitHub MCP mechanism for
   Copilot CLI/VS Code.
 
@@ -277,9 +281,9 @@ references/            - verified endpoint tables, supporting docs
 tests/                 - Pester (*.Tests.ps1) and/or Bats (*.bats)
 ```
 
-42 Skills are defined (see `.github/skills/`): `human-approval` plus 11
-Bitbucket, 4 Jira, 3 Confluence, 10 JFrog, and 13 GitHub Skills, per
-`requirement.md` Section 15.
+48 Skills are defined (see `.github/skills/`): `human-approval` plus 11
+Bitbucket, 4 Jira, 3 Confluence, 10 JFrog, 6 SonarQube, and 13 GitHub
+Skills, per `requirement.md` Section 15.
 
 ## Approval architecture
 
@@ -413,7 +417,9 @@ rewriting Skills. See "Production Hardening" below.
 
 ### Bitbucket
 
-Target Bitbucket Data Center **9.4.5** exactly;
+All Bitbucket Data Center versions supported; version discovered at
+runtime via `GET /rest/api/1.0/application-properties` - never
+hardcoded or assumed (reference baseline: `policies/versions-and-sources.yaml#bitbucket`).
 `/rest/api/1.0/` is the REST fallback base. See
 `.github/skills/bitbucket-*/SKILL.md`.
 
@@ -433,6 +439,15 @@ Confluence Cloud via Rovo MCP, REST fallback `/wiki/api/v2/` (legacy
 Self-managed Artifactory; version discovered at runtime via
 `GET /artifactory/api/system/version` - never assumed. See
 `.github/skills/jfrog-*/SKILL.md`.
+
+### SonarQube
+
+**Both deployments supported.** Self-managed SonarQube Server/Community
+Build (on-prem) — all versions supported, version discovered at runtime
+via `GET /api/system/status` - never hardcoded — **and** SonarQube Cloud
+(SaaS, continuously deployed, requires `-Organization`). See
+`policies/versions-and-sources.yaml#sonarqube` and
+`.github/skills/sonarqube-*/SKILL.md`.
 
 ### GitHub Enterprise
 
@@ -576,6 +591,8 @@ Quick links:
   https://confluence.atlassian.com/ ,
   https://confluence.atlassian.com/bitbucketserver/
 - JFrog: https://docs.jfrog.com/ , https://jfrog.com/
+- SonarQube: https://docs.sonarsource.com/sonarqube-community-build/ ,
+  https://github.com/SonarSource/sonarqube-mcp-server
 - VS Code: https://code.visualstudio.com/docs/
 
 ---
@@ -585,7 +602,7 @@ official documentation; mark `NOT IMPLEMENTED` rather than fabricate.
 
 # Features — what's actually available, and how
 
-A capability matrix for every one of the 42 Skills in
+A capability matrix for every one of the 48 Skills in
 `.github/skills/`: what operation it covers, its approval risk
 category, whether an **official MCP tool** is confirmed/expected to
 cover it, and whether a **runnable fallback script** (`.ps1`+`.sh`
@@ -606,7 +623,7 @@ official-doc URL cited below.
 
 ---
 
-## Bitbucket Data Center 9.4.5
+## Bitbucket Data Center (all versions supported)
 
 MCP: official **"MCP for Bitbucket DC"** (`policies/versions-and-sources.yaml#bitbucket`), tools discovered at connect time — no fixed names assumed anywhere below.
 
@@ -707,6 +724,34 @@ MCP: official **JFrog MCP Server** (beta; `policies/versions-and-sources.yaml#jf
 | `jfrog-projects` | Delete project | DESTRUCTIVE | Not in catalog → REST fallback | No |
 | `jfrog-xray` | Vulnerability/license lookup | READ_ONLY | Verified (`catalog_vulnerabilities_get`, `catalog_packages_get`, `curation_packages_get_status`) | No |
 | `jfrog-build-info` | List builds/runs, get build info | READ_ONLY | Verified (`artifactory_builds_list_builds/list_build_runs/get_info`) | No |
+
+---
+
+## SonarQube (Server + Cloud)
+
+MCP: official **SonarQube MCP Server** (SonarSource; `policies/versions-and-sources.yaml#sonarqube`), supports BOTH SonarQube Server/Community Build (self-managed) and SonarQube Cloud via `SONARQUBE_URL`/`SONARQUBE_ORG`. Every script also accepts `-Organization`/`--organization` directly for Cloud.
+
+| Skill | Operation | Risk | MCP | Script |
+|---|---|---|---|---|
+| `sonarqube-projects` | List/get project | READ_ONLY | Verified (`search_my_sonarqube_projects`) | Yes |
+| `sonarqube-projects` | Create project | WRITE | Not in catalog → REST fallback | Yes |
+| `sonarqube-projects` | Delete project | DESTRUCTIVE | Not in catalog → REST fallback | Yes |
+| `sonarqube-quality-gates` | List quality gates | READ_ONLY | Verified (`list_quality_gates`) | Yes |
+| `sonarqube-quality-gates` | Get project quality gate status | READ_ONLY | Verified (`get_project_quality_gate_status`) | Yes |
+| `sonarqube-quality-gates` | Select quality gate for project | WRITE | Not in catalog → REST fallback | Yes |
+| `sonarqube-issues` | Search issues | READ_ONLY | Verified (`search_sonar_issues_in_projects`) | Yes |
+| `sonarqube-issues` | Assign issue | WRITE | Not in catalog → REST fallback | Yes |
+| `sonarqube-issues` | Transition issue | WRITE | Verified but narrower vocabulary (`change_sonar_issue_status`: accept/falsepositive/reopen only) → full 6-value state machine always uses REST fallback | Yes |
+| `sonarqube-hotspots` | Search hotspots | READ_ONLY | Verified (`search_security_hotspots`) | Yes |
+| `sonarqube-hotspots` | Get hotspot | READ_ONLY | Verified (`show_security_hotspot`) | Yes |
+| `sonarqube-hotspots` | Change hotspot status | WRITE | Verified (`change_security_hotspot_status`) | Yes |
+| `sonarqube-admin` | Get system health (Server only) | READ_ONLY | Verified (`get_system_health`) | Yes |
+| `sonarqube-admin` | Get system info (Server only) | READ_ONLY | Verified (`get_system_info`) | Yes |
+| `sonarqube-admin` | Ping system (Server only) | READ_ONLY | Verified (`ping_system`) | Yes |
+| `sonarqube-admin` | Get system logs (Server only) | READ_ONLY | Verified (`get_system_logs`) | No (not yet scripted) |
+| `sonarqube-webhooks` | List webhooks | READ_ONLY | Verified (`list_webhooks`) | Yes |
+| `sonarqube-webhooks` | Create webhook | WRITE | Verified (`create_webhook`) | Yes |
+| `sonarqube-webhooks` | Delete webhook | DESTRUCTIVE | Not in catalog → REST fallback | Yes |
 
 ---
 

@@ -8,7 +8,8 @@
 #                 1. Exhaustive URL registry check: every URL belonging
 #                    to a tracked vendor domain (docs.github.com,
 #                    developer.atlassian.com, confluence.atlassian.com,
-#                    docs.jfrog.com, jfrog.com, code.visualstudio.com,
+#                    docs.jfrog.com, jfrog.com, docs.sonarsource.com,
+#                    www.sonarsource.com, code.visualstudio.com,
 #                    mcp.atlassian.com, api.githubcopilot.com,
 #                    github.com/github/github-mcp-server) that appears
 #                    ANYWHERE in the repo (*.md, *.yaml, *.yml, *.json)
@@ -37,7 +38,7 @@ VERSIONS_FILE="$REPO_ROOT/policies/versions-and-sources.yaml"
 
 [[ -f "$VERSIONS_FILE" ]] || { echo "ERROR: $VERSIONS_FILE not found." >&2; exit 10; }
 
-VENDOR_PATTERN='https://(docs\.github\.com|developer\.atlassian\.com|confluence\.atlassian\.com|docs\.jfrog\.com|jfrog\.com|code\.visualstudio\.com|mcp\.atlassian\.com|api\.githubcopilot\.com|github\.com/github/github-mcp-server)[A-Za-z0-9._~:/?#@!$&'"'"'()*+,;=%-]*'
+VENDOR_PATTERN='https://(docs\.github\.com|developer\.atlassian\.com|confluence\.atlassian\.com|docs\.jfrog\.com|jfrog\.com|docs\.sonarsource\.com|www\.sonarsource\.com|github\.com/SonarSource/sonarqube-mcp-server|code\.visualstudio\.com|mcp\.atlassian\.com|api\.githubcopilot\.com|github\.com/github/github-mcp-server)[A-Za-z0-9._~:/?#@!$&'"'"'()*+,;=%-]*'
 
 failures=0
 checked=0
@@ -67,8 +68,17 @@ echo "=== Check 2: files that must carry a literal, working copy ==="
 
 extract() { grep -oP "$1" "$VERSIONS_FILE" 2>/dev/null | head -1 || true; }
 
-BITBUCKET_VERSION=$(extract 'pinned_target_version:\s*"\K[^"]+')
-JFROG_VERSION=$(extract 'reference_version_at_generation_time:\s*"\K[^"]+')
+# Section-scoped extraction: several systems (jfrog, sonarqube) share the
+# same field name (e.g. reference_version_at_generation_time), so a plain
+# whole-file grep would silently grab the wrong system's value. This
+# extracts only the lines belonging to one top-level YAML section.
+extract_in_section() {
+  local section="$1" pattern="$2"
+  awk -v s="^${section}:" 'BEGIN{f=0} $0 ~ s {f=1; next} f && /^[^[:space:]]/ {f=0} f' "$VERSIONS_FILE" \
+    | grep -oP "$pattern" | head -1 || true
+}
+
+JFROG_VERSION=$(extract_in_section 'jfrog' 'reference_version_at_generation_time:\s*"\K[^"]+')
 ROVO_ENDPOINT=$(extract 'mcp_endpoint:\s*"\K[^"]+')
 GITHUB_HOSTED_ENDPOINT=$(extract 'mcp_hosted_endpoint_cloud:\s*"\K[^"]+')
 BITBUCKET_MCP_PATTERN=$(extract 'mcp_endpoint_pattern:\s*"\K[^"]+')
@@ -91,7 +101,6 @@ check_contains() {
   fi
 }
 
-check_contains "bitbucket pinned version"      "README.md"        "$BITBUCKET_VERSION"
 check_contains "jfrog reference version"       "README.md"        "$JFROG_VERSION"
 check_contains "rovo mcp endpoint (.mcp.json)" ".mcp.json"        "$ROVO_ENDPOINT"
 check_contains "rovo mcp endpoint (vscode)"    ".vscode/mcp.json" "$ROVO_ENDPOINT"

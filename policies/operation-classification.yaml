@@ -108,6 +108,25 @@ operations:
   - { system: generic,     resource: branch_protection, operation: CHANGE,                        category: ADMINISTRATIVE }
   - { system: jfrog,       resource: artifact,          operation: DELETE,                        category: DESTRUCTIVE }
   - { system: jfrog,       resource: repository,        operation: CREATE,                        category: ADMINISTRATIVE }
+  - { system: sonarqube,   resource: project,           operation: LIST,                           category: READ_ONLY }
+  - { system: sonarqube,   resource: project,           operation: GET,                            category: READ_ONLY }
+  - { system: sonarqube,   resource: project,           operation: CREATE,                         category: WRITE }
+  - { system: sonarqube,   resource: project,           operation: DELETE,                         category: DESTRUCTIVE }
+  - { system: sonarqube,   resource: quality_gate,      operation: LIST,                           category: READ_ONLY }
+  - { system: sonarqube,   resource: quality_gate,      operation: STATUS,                         category: READ_ONLY }
+  - { system: sonarqube,   resource: quality_gate,      operation: SELECT,                         category: WRITE }
+  - { system: sonarqube,   resource: issue,             operation: SEARCH,                         category: READ_ONLY }
+  - { system: sonarqube,   resource: issue,             operation: ASSIGN,                         category: WRITE }
+  - { system: sonarqube,   resource: issue,             operation: TRANSITION,                     category: WRITE }
+  - { system: sonarqube,   resource: hotspot,           operation: SEARCH,                         category: READ_ONLY }
+  - { system: sonarqube,   resource: hotspot,           operation: GET,                            category: READ_ONLY }
+  - { system: sonarqube,   resource: hotspot,           operation: CHANGE_STATUS,                  category: WRITE }
+  - { system: sonarqube,   resource: system,            operation: HEALTH,                         category: READ_ONLY }
+  - { system: sonarqube,   resource: system,            operation: INFO,                           category: READ_ONLY }
+  - { system: sonarqube,   resource: system,            operation: PING,                           category: READ_ONLY }
+  - { system: sonarqube,   resource: webhook,           operation: LIST,                            category: READ_ONLY }
+  - { system: sonarqube,   resource: webhook,           operation: CREATE,                          category: WRITE }
+  - { system: sonarqube,   resource: webhook,           operation: DELETE,                          category: DESTRUCTIVE }
   - { system: jira,        resource: issue,             operation: EDIT,                           category: WRITE }
   - { system: jira,        resource: issue,             operation: DELETE,                         category: DESTRUCTIVE }
   - { system: confluence,  resource: page,              operation: EDIT,                           category: WRITE }

@@ -1,0 +1,17 @@
+# SonarQube - Local POC Access Token
+#
+# Copy to "sonarqube-token.txt" (no .example suffix). That file is
+# gitignored and MUST NEVER be committed. LOCAL POC USE ONLY.
+#
+# Works for BOTH supported deployments:
+#   - SonarQube Server / Community Build (self-managed, on-prem): generate
+#     a User Token under My Account > Security.
+#   - SonarQube Cloud: generate a token under My Account > Security; also
+#     set the -Organization parameter on scripts that require it (Cloud
+#     only - Server ignores it).
+#
+# Required: a SonarQube user token scoped to the minimum permission
+# needed for the operations you intend to exercise.
+#
+# Format: the raw token value only.
+REPLACE_WITH_REAL_SONARQUBE_TOKEN

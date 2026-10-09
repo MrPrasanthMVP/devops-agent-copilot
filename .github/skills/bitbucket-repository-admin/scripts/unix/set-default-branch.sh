@@ -50,7 +50,7 @@ APPROVAL_STATUS=$?
 set -e
 
 if [[ $APPROVAL_STATUS -ne 0 ]]; then
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "UPDATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "UPDATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "set-default-branch.sh" "$SCRIPT_VERSION" \
     "ADMINISTRATIVE" true "DENIED" "DENIED" "NOT_APPLICABLE" "$APPROVAL_OUTPUT"
   echo "$APPROVAL_OUTPUT" >&2
@@ -78,7 +78,7 @@ if invoke_secure_rest PUT "$URI" "$TOKEN" "Bearer" "$BODY" >/dev/null; then
     fi
   fi
 
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "UPDATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "UPDATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "set-default-branch.sh" "$SCRIPT_VERSION" \
     "ADMINISTRATIVE" true "APPROVED" "$RESULT" "$VERIFICATION" "null"
 
@@ -88,7 +88,7 @@ if invoke_secure_rest PUT "$URI" "$TOKEN" "Bearer" "$BODY" >/dev/null; then
   [[ "$VERIFICATION" != "CONFIRMED" ]] && exit "$EXIT_VERIFICATION_FAILURE"
   exit "$EXIT_SUCCESS"
 else
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "UPDATE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "UPDATE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "set-default-branch.sh" "$SCRIPT_VERSION" \
     "ADMINISTRATIVE" true "APPROVED" "FAILURE" "UNKNOWN" "request failed"
   echo "ERROR: failed to set default branch for '$TARGET'" >&2

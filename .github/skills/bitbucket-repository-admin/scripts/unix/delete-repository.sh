@@ -2,7 +2,7 @@
 # delete-repository.sh
 #
 # Purpose: DESTRUCTIVE -- permanently deletes a Bitbucket Data Center
-#   9.4.5 repository via the REST API fallback. Requires a pre-issued,
+#   repository via the REST API fallback. Requires a pre-issued,
 #   matching "APPROVE DELETE" approval record.
 # Supported OS: Linux, macOS (Bash).
 # Dependencies: scripts/common/common.sh (curl, jq, openssl)
@@ -57,7 +57,7 @@ OPERATION_KEY="bitbucket.repository.delete"
 
 VALIDATION=$(test_approval_token "$OPERATION_ID" "bitbucket" "$TARGET" "$OPERATION_KEY" "APPROVE DELETE") || true
 if [[ "$VALIDATION" != "VALID" ]]; then
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "DELETE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "DELETE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "delete-repository.sh" "$SCRIPT_VERSION" \
     "DESTRUCTIVE" "true" "DENIED" "DENIED" "NOT_APPLICABLE" "${VALIDATION#INVALID: }"
   echo "ERROR: Approval check failed: ${VALIDATION#INVALID: }" >&2
@@ -75,7 +75,7 @@ fi
 if ! invoke_secure_rest DELETE "$URI" "$TOKEN" "Bearer" "" >/dev/null 2>/tmp/bb_del_err.$$; then
   ERR_MSG="$(cat /tmp/bb_del_err.$$ 2>/dev/null || echo 'unknown error')"
   rm -f /tmp/bb_del_err.$$
-  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "DELETE" "$TARGET" \
+  write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "DELETE" "$TARGET" \
     "rest-api" "bitbucket-repository-admin" "delete-repository.sh" "$SCRIPT_VERSION" \
     "DESTRUCTIVE" "true" "APPROVED" "FAILURE" "UNKNOWN" "$ERR_MSG"
   echo "ERROR: Failed to delete repository '$TARGET': $ERR_MSG" >&2
@@ -92,7 +92,7 @@ else
   VERIFICATION="CONFIRMED"; RESULT="SUCCESS"
 fi
 
-write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "9.4.5" "repository" "DELETE" "$TARGET" \
+write_audit_log "$OPERATION_ID" "$USER_NAME" "bitbucket" "runtime-detected" "repository" "DELETE" "$TARGET" \
   "rest-api" "bitbucket-repository-admin" "delete-repository.sh" "$SCRIPT_VERSION" \
   "DESTRUCTIVE" "true" "APPROVED" "$RESULT" "$VERIFICATION" "null"
 

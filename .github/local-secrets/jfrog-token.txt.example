@@ -1,0 +1,13 @@
+# JFrog Platform (Artifactory Self-Managed) - Local POC Access Token
+#
+# Copy to "jfrog-token.txt" (no .example suffix). That file is gitignored
+# and MUST NEVER be committed. LOCAL POC USE ONLY.
+#
+# Required: a JFrog Platform access token
+# (Identity and Access > Access Tokens) scoped to the minimum permission
+# target needed for the operations you intend to exercise. For
+# jfrog-cleanup testing, use a token scoped to a non-production
+# repository.
+#
+# Format: the raw token value only.
+REPLACE_WITH_REAL_JFROG_TOKEN

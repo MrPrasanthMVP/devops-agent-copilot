@@ -1,6 +1,6 @@
 ---
 name: bitbucket-branch-permissions
-description: View and change Bitbucket Data Center 9.4.5 branch permissions/restrictions (who can push, force-push, or delete on protected branches like main/release/*). Use for any request to lock down, restrict, or change push rules on a branch or branch pattern.
+description: View and change Bitbucket Data Center branch permissions/restrictions (who can push, force-push, or delete on protected branches like main/release/*). Use for any request to lock down, restrict, or change push rules on a branch or branch pattern.
 license: Proprietary - internal enterprise use
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: bitbucket-merge-settings
-description: View and change Bitbucket Data Center 9.4.5 repository merge strategy settings (allowed merge strategies, default strategy, commit message templates). Use for requests about which merge strategies (merge commit, squash, fast-forward) are allowed or default for a repository.
+description: View and change Bitbucket Data Center repository merge strategy settings (allowed merge strategies, default strategy, commit message templates). Use for requests about which merge strategies (merge commit, squash, fast-forward) are allowed or default for a repository.
 license: Proprietary - internal enterprise use
 ---
 

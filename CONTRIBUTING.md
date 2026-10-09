@@ -15,8 +15,8 @@ accordingly - the bar is higher than a typical internal tool.
    small set of files that must carry a literal copy (`.mcp.json`,
    `.vscode/mcp.json`, `README.md`'s summary table) and update those to
    match. Do not hand-edit a version/URL anywhere else — scripts under
-   `scripts/bitbucket/` and `scripts/jfrog/` already read the pinned/
-   reference values from that file at runtime.
+   `scripts/bitbucket/`, `scripts/jfrog/`, and `scripts/sonarqube/`
+   already read the pinned/reference values from that file at runtime.
 2. Read `.github/skills/human-approval/SKILL.md` and
    `policies/approval-policy.yaml` - every Skill you add or change must
    respect the approval boundary.
@@ -29,7 +29,8 @@ accordingly - the bar is higher than a typical internal tool.
   verifiable against the official sources listed in `requirement.md`
   Section 1 (docs.github.com, developer.atlassian.com,
   confluence.atlassian.com/bitbucketserver, docs.jfrog.com,
-  code.visualstudio.com/docs). If you cannot verify something, write
+  docs.sonarsource.com, code.visualstudio.com/docs). If you cannot
+  verify something, write
   `NOT IMPLEMENTED — OFFICIAL DOCUMENTATION/API VERIFICATION REQUIRED`
   instead of guessing.
 - **Never invent MCP tools or APIs.**

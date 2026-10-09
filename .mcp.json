@@ -15,6 +15,16 @@
       "url": "https://artifactory.example.internal/mcp",
       "tools": ["*"]
     },
+    "sonarqube": {
+      "type": "local",
+      "command": "docker",
+      "args": ["run", "--init", "--pull=always", "-i", "--rm", "-e", "SONARQUBE_TOKEN", "-e", "SONARQUBE_URL", "sonarsource/sonarqube-mcp"],
+      "env": {
+        "SONARQUBE_TOKEN": "<sonarqube-token>",
+        "SONARQUBE_URL": "<sonarqube-base-url>"
+      },
+      "tools": ["*"]
+    },
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",

@@ -1,6 +1,6 @@
 ---
 name: bitbucket-project-admin
-description: Create, read, update, and delete Bitbucket Data Center 9.4.5 projects. Use for requests about creating, renaming, or deleting a Bitbucket project, or listing/inspecting project-level settings.
+description: Create, read, update, and delete Bitbucket Data Center projects. Use for requests about creating, renaming, or deleting a Bitbucket project, or listing/inspecting project-level settings.
 license: Proprietary - internal enterprise use
 ---
 
@@ -31,7 +31,7 @@ assume a specific tool name.
 
 ## API fallback
 
-Bitbucket Server/Data Center REST API 1.0 (9.4.5 — not 10.x):
+Bitbucket Server/Data Center REST API 1.0 (all versions supported; re-verify shape for the detected version):
 
 - `GET /rest/api/1.0/projects` — list
 - `GET /rest/api/1.0/projects/{projectKey}` — read

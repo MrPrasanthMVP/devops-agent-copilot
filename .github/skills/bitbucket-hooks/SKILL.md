@@ -1,6 +1,6 @@
 ---
 name: bitbucket-hooks
-description: View and configure Bitbucket Data Center 9.4.5 repository hooks (pre-receive/post-receive plugin hooks, e.g. reject-force-push, commit-message-validator). Use for enabling/disabling/configuring a repository hook.
+description: View and configure Bitbucket Data Center repository hooks (pre-receive/post-receive plugin hooks, e.g. reject-force-push, commit-message-validator). Use for enabling/disabling/configuring a repository hook.
 license: Proprietary - internal enterprise use
 ---
 

@@ -50,7 +50,7 @@ try {
     $repo = Invoke-SecureRestMethod -Uri $uri -Method GET -Token $token
 
     Write-AuditLog -OperationId $operationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "GET" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "GET" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "get-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "READ_ONLY" -ApprovalRequired $false -ApprovalStatus "NOT_REQUIRED" `
@@ -61,7 +61,7 @@ try {
 }
 catch {
     Write-AuditLog -OperationId $operationId -User $User -System "bitbucket" `
-        -SystemVersion "9.4.5" -Resource "repository" -Operation "GET" -Target $target `
+        -SystemVersion "runtime-detected" -Resource "repository" -Operation "GET" -Target $target `
         -ExecutionMechanism "rest-api" -Skill "bitbucket-repository-admin" `
         -Script "get-repository.ps1" -ScriptVersion $ScriptVersion `
         -Risk "READ_ONLY" -ApprovalRequired $false -ApprovalStatus "NOT_REQUIRED" `

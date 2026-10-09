@@ -1,6 +1,6 @@
 ---
 name: bitbucket-permissions
-description: View and change Bitbucket Data Center 9.4.5 project- and repository-level permissions (user/group grants of PROJECT_READ/WRITE/ADMIN, REPO_READ/WRITE/ADMIN). Use for any request to grant, change, or revoke Bitbucket access.
+description: View and change Bitbucket Data Center project- and repository-level permissions (user/group grants of PROJECT_READ/WRITE/ADMIN, REPO_READ/WRITE/ADMIN). Use for any request to grant, change, or revoke Bitbucket access.
 license: Proprietary - internal enterprise use
 ---
 

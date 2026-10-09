@@ -1,0 +1,20 @@
+# Bitbucket Data Center 9.4.5 - Local POC Personal Access Token
+#
+# This file is a TEMPLATE. Copy it to "bitbucket-token.txt" (no .example
+# suffix) in this same directory and replace the placeholder below with a
+# real Bitbucket Data Center HTTP access token.
+#
+# "bitbucket-token.txt" is covered by .gitignore and MUST NEVER be
+# committed. This mechanism is for LOCAL POC USE ONLY -- see Section 12 /
+# README.md "Production Hardening" for the enterprise replacement
+# (OAuth/OIDC, GitHub App, Atlassian OAuth, secret manager, credential
+# broker, managed/workload identity).
+#
+# Required scope: a Bitbucket HTTP access token with the minimum
+# permissions needed for the operations you intend to exercise
+# (read-only testing requires only repository read; write/admin testing
+# requires the corresponding project/repository admin permission).
+#
+# Format: the raw token value, nothing else, no quotes, no trailing
+# newline content beyond the token itself.
+REPLACE_WITH_REAL_BITBUCKET_TOKEN
